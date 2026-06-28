@@ -190,8 +190,8 @@ body{font-family:'MS Sans Serif',Arial,sans-serif;font-size:11px;background:#008
   </div>
   <div class="win-body" style="padding:4px;">
     <div class="proj-list">
+      <div class="proj-item" onclick="openWin('skysync')" style="background:#fffbe6;border-left:3px solid #000080;"><div class="proj-title">🌐 SkySync Pro — Fare Scraping Engine <span style="color:#000080;font-weight:normal;font-size:10px;">▶ click to open live demo</span></div><div class="proj-desc">Multi-region flight fare scraping engine targeting Pakistan, UAE &amp; KSA routes. Decrypts POST responses from complex travel APIs. Google Sheets output with color-coded Airblue vs competitor comparison. Feeds pricing models with 95% forecast accuracy improvement.</div><div class="proj-tech">Python · Playwright · Streamlit · Next.js · Supabase · Google Sheets API</div></div>
       <div class="proj-item"><div class="proj-title">📊 AERO_X Revenue Dashboard</div><div class="proj-desc">Real-time market intelligence platform monitoring daily fare fluctuations across competitor carriers. Altea/Amadeus-style parsing with NEXUS, COMPARE, BOOKING_CURVE & HISTORY tabs. Contributed to 15% yield improvement on monitored routes.</div><div class="proj-tech">Python · Streamlit · Plotly · Supabase · Pandas</div></div>
-      <div class="proj-item" ondblclick="openWin('skysync')" title="Double-click to open SkySync Pro"><div class="proj-title">🌐 SkySync Pro — Fare Scraping Engine <span style="color:#808080;font-weight:normal;font-size:10px;">[double-click to open]</span></div><div class="proj-desc">Multi-region flight fare scraping engine targeting Pakistan, UAE &amp; KSA routes. Decrypts POST responses from complex travel APIs (sastaticket.pk). Google Sheets output with color-coded Airblue vs competitor comparison. Feeds pricing models with 95% forecast accuracy improvement.</div><div class="proj-tech">Python · Playwright · Streamlit · Next.js · Supabase · Google Sheets API</div></div>
       <div class="proj-item"><div class="proj-title">📋 Group Quotes Management System</div><div class="proj-desc">6-table Supabase schema replacing manual group-booking workflow. Closed-loop fare suggestion based on load % and days to departure. Automates pricing decisions for group travel operations.</div><div class="proj-tech">Supabase · PostgreSQL · Python · Streamlit</div></div>
       <div class="proj-item"><div class="proj-title">📈 Fare Comparison Matrix Generator</div><div class="proj-desc">Automated Google Apps Script that cleans, organises, and standardises raw flight data into a structured Google Sheets fare matrix. Reduced manual data preparation time by 90%, enabling faster O&D-level competitive fare analysis.</div><div class="proj-tech">Google Apps Script · Python · gspread · Google Sheets</div></div>
       <div class="proj-item"><div class="proj-title">📉 Power BI Revenue Dashboards</div><div class="proj-desc">Commercial planning dashboards for route performance, load factor trends, and yield reporting at Airblue. RASK/CASK modelling and yield optimization across 24 domestic & international routes.</div><div class="proj-tech">Power BI · DAX · Excel · SQL</div></div>
@@ -502,10 +502,25 @@ let _skysyncLoaded = false;
 function loadSkySync() {
   if (_skysyncLoaded) return;
   _skysyncLoaded = true;
-  const html = atob(_SKYSYNC_B64);
-  const blob = new Blob([html], {type: 'text/html'});
+  // Show loading indicator immediately
+  const frame = document.getElementById('skysync-frame');
+  const body = frame.closest('.win-body');
+  body.style.position = 'relative';
+  const loader = document.createElement('div');
+  loader.id = 'skysync-loader';
+  loader.style.cssText = 'position:absolute;inset:0;background:#0b0f1a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;color:#60a5fa;font-family:monospace;font-size:13px;gap:12px;';
+  loader.innerHTML = '<div style="width:32px;height:32px;border:3px solid #1d4ed8;border-top-color:#60a5fa;border-radius:50%;animation:spin 0.8s linear infinite;"></div><span>Loading SkySync Pro...</span><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  body.appendChild(loader);
+  // Decode base64 as UTF-8 properly (atob gives Latin-1, not UTF-8)
+  const b64 = _SKYSYNC_B64;
+  const binStr = atob(b64);
+  const bytes = new Uint8Array(binStr.length);
+  for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+  const html = new TextDecoder('utf-8').decode(bytes);
+  const blob = new Blob([html], {type: 'text/html;charset=utf-8'});
   const url = URL.createObjectURL(blob);
-  document.getElementById('skysync-frame').src = url;
+  frame.onload = () => { const l = document.getElementById('skysync-loader'); if(l) l.remove(); };
+  frame.src = url;
 }
 
 // ============ WINDOW MANAGER ============
