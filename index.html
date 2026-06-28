@@ -1,1934 +1,1034 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fare Intelligence Suite · Hamza Sarfraz</title>
-<meta name="description" content="Interactive portfolio demo — automated international flight fare scraping, multi-currency comparison, and Google Sheets sync pipeline by Hamza Sarfraz.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hamza Sarfraz — Portfolio</title>
 <style>
-/* ── Reset & tokens ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'MS Sans Serif',Arial,sans-serif;font-size:11px;background:#008080;overflow:hidden;height:100vh;width:100vw;cursor:default;user-select:none;}
+.wallpaper{position:fixed;inset:0;z-index:0;background-color:#008080;background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px),repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px);}
+.desktop{position:fixed;inset:0;bottom:28px;z-index:1;display:flex;flex-direction:column;flex-wrap:wrap;align-content:flex-start;gap:8px;padding:12px;}
+.icon{display:flex;flex-direction:column;align-items:center;width:72px;gap:4px;padding:4px;cursor:pointer;border-radius:1px;}
+.icon:hover .icon-label,.icon.selected .icon-label{background:#000080;color:#fff;outline:1px dotted #fff;outline-offset:-2px;}
+.icon-img{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:28px;}
+.icon-label{color:#fff;text-align:center;font-size:11px;line-height:1.2;padding:1px 2px;text-shadow:1px 1px 0 #000,0 1px 0 #000;max-width:72px;word-break:break-word;}
+.taskbar{position:fixed;bottom:0;left:0;right:0;height:28px;z-index:9999;background:#c0c0c0;border-top:2px solid #fff;display:flex;align-items:center;gap:2px;padding:2px;}
+.start-btn{height:22px;padding:0 8px 0 6px;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;font-weight:bold;font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;font-family:'MS Sans Serif',Arial,sans-serif;white-space:nowrap;}
+.start-btn:active,.start-btn.active{border-color:#808080 #fff #fff #808080;}
+.taskbar-sep{width:2px;height:22px;background:#808080;margin:0 2px;border-right:1px solid #fff;}
+.taskbar-btn{height:22px;padding:0 8px;min-width:120px;max-width:160px;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;font-size:11px;font-family:'MS Sans Serif',Arial,sans-serif;display:flex;align-items:center;gap:4px;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.taskbar-btn.active{border-color:#808080 #fff #fff #808080;background:#b0b0b0;}
+.taskbar-spacer{flex:1;}
+.clock{height:22px;padding:0 8px;border:2px solid #808080;border-color:#808080 #fff #fff #808080;display:flex;align-items:center;font-size:11px;white-space:nowrap;min-width:70px;justify-content:center;}
+.start-menu{position:fixed;bottom:28px;left:0;width:200px;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;z-index:99999;display:none;}
+.start-menu.open{display:block;}
+.start-menu-sidebar{position:absolute;left:0;top:0;bottom:0;width:24px;background:#808080;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;}
+.start-menu-sidebar span{writing-mode:vertical-rl;transform:rotate(180deg);color:#c0c0c0;font-size:16px;font-weight:bold;letter-spacing:2px;}
+.start-menu-items{margin-left:24px;}
+.start-item{padding:6px 12px 6px 10px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px;}
+.start-item:hover{background:#000080;color:#fff;}
+.start-item-icon{font-size:18px;width:20px;text-align:center;}
+.start-divider{height:1px;background:#808080;margin:2px 0;border-bottom:1px solid #fff;}
+.win{position:fixed;z-index:100;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;min-width:300px;min-height:200px;display:none;flex-direction:column;}
+.win.open{display:flex;}
+.win.focused{z-index:1000;}
+.win-title{background:linear-gradient(90deg,#808080,#a0a0a0);color:#fff;height:18px;display:flex;align-items:center;justify-content:space-between;padding:0 2px 0 4px;cursor:move;flex-shrink:0;}
+.win-title.active-title{background:linear-gradient(90deg,#000080,#1084d0);}
+.win-title-text{font-size:11px;font-weight:bold;display:flex;align-items:center;gap:4px;overflow:hidden;white-space:nowrap;flex:1;}
+.win-controls{display:flex;gap:2px;position:relative;z-index:10;}
+.win-btn{width:18px;height:16px;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;font-weight:bold;line-height:1;font-family:Arial,sans-serif;padding:0;flex-shrink:0;position:relative;z-index:20;pointer-events:all;}
+.win-btn:active{border-color:#808080 #fff #fff #808080;outline:none;}
+.win-menubar{border-bottom:1px solid #808080;padding:2px 4px;display:flex;gap:0;flex-shrink:0;}
+.win-menu-item{padding:2px 8px;font-size:11px;cursor:pointer;}
+.win-menu-item:hover{background:#000080;color:#fff;}
+.win-body{flex:1;overflow:auto;padding:8px;background:#c0c0c0;}
+.win-statusbar{height:20px;border-top:1px solid #808080;display:flex;align-items:center;padding:0 6px;font-size:11px;color:#000;flex-shrink:0;}
+.statusbar-pane{border:1px solid;border-color:#808080 #fff #fff #808080;padding:0 6px;height:16px;display:flex;align-items:center;font-size:11px;}
+.w-groupbox{border:2px solid;border-color:#808080 #fff #fff #808080;padding:8px 8px 6px;margin-bottom:10px;position:relative;}
+.w-groupbox-title{position:absolute;top:-7px;left:6px;background:#c0c0c0;padding:0 4px;font-size:11px;font-weight:bold;}
+.w-divider{height:0;border-top:1px solid #808080;border-bottom:1px solid #fff;margin:6px 0;}
+.w-btn{padding:4px 16px;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;font-size:11px;cursor:pointer;font-family:'MS Sans Serif',Arial,sans-serif;}
+.w-btn:active{border-color:#808080 #fff #fff #808080;}
+.w-progress{height:16px;border:2px solid;border-color:#808080 #fff #fff #808080;background:#c0c0c0;overflow:hidden;}
+.w-progress-bar{height:100%;background:#000080;}
+.proj-list{background:#fff;border:2px solid;border-color:#808080 #fff #fff #808080;padding:0;}
+.proj-item{padding:6px 8px;border-bottom:1px solid #e0e0e0;cursor:pointer;}
+.proj-item:hover{background:#000080;color:#fff;}
+.proj-item:hover .proj-desc,.proj-item:hover .proj-tech{color:#cdf;}
+.proj-title{font-size:11px;font-weight:bold;margin-bottom:2px;}
+.proj-desc{font-size:10px;color:#444;line-height:1.4;}
+.proj-tech{font-size:10px;color:#000080;margin-top:2px;}
+.skill-row{margin-bottom:8px;}
+.skill-name{font-size:11px;margin-bottom:3px;display:flex;justify-content:space-between;}
+.contact-field-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.contact-label{width:70px;font-size:11px;text-align:right;}
+.contact-val{flex:1;height:20px;background:#fff;border:2px solid;border-color:#808080 #fff #fff #808080;padding:1px 4px;font-size:11px;font-family:'MS Sans Serif',Arial,sans-serif;}
+.dialog-overlay{position:fixed;inset:0;z-index:99998;background:transparent;display:none;}
+.dialog-overlay.open{display:block;}
+.dialog{position:fixed;z-index:99999;background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;min-width:300px;}
+.dialog-title{background:linear-gradient(90deg,#000080,#1084d0);color:#fff;height:18px;display:flex;align-items:center;justify-content:space-between;padding:0 2px 0 4px;}
+.dialog-title-text{font-size:11px;font-weight:bold;}
+.dialog-body{padding:16px;display:flex;gap:12px;align-items:flex-start;}
+.dialog-icon{font-size:32px;flex-shrink:0;}
+.dialog-text{font-size:11px;line-height:1.6;}
+.dialog-footer{padding:8px;display:flex;justify-content:center;gap:8px;border-top:1px solid #808080;}
+.resize-handle{position:absolute;right:0;bottom:0;width:12px;height:12px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,#808080 50%);}
+::-webkit-scrollbar{width:16px;height:16px;}
+::-webkit-scrollbar-track{background:#c0c0c0;}
+::-webkit-scrollbar-thumb{background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;}
 
-:root {
-  --bg:       #0b0f1a;
-  --bg2:      #111827;
-  --bg3:      #1a2235;
-  --bg4:      #1f2937;
-  --border:   rgba(255,255,255,0.08);
-  --border2:  rgba(255,255,255,0.14);
-  --border3:  rgba(255,255,255,0.24);
-  --text:     #e8ecf4;
-  --muted:    #7a8499;
-  --subtle:   #3d4a63;
-  --accent:   #3b82f6;
-  --accent2:  #60a5fa;
-  --green:    #22c55e;
-  --amber:    #f59e0b;
-  --red:      #ef4444;
-  --green-bg: rgba(34,197,94,0.1);
-  --amber-bg: rgba(245,158,11,0.1);
-  --red-bg:   rgba(239,68,68,0.1);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 350ms ease;
-  --mono:     'JetBrains Mono', monospace;
-  --display:  'Syne', sans-serif;
-  --body:     'Inter', sans-serif;
-}
+/* Solitaire styles */
+#win-solitaire{width:660px;height:540px;}
+.sol-header{display:flex;gap:4px;padding:4px 6px;border-bottom:1px solid #808080;flex-shrink:0;}
+.sol-btn{background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;font-size:10px;padding:2px 10px;cursor:pointer;font-family:'MS Sans Serif',Arial,sans-serif;}
+.sol-btn:active{border-color:#808080 #fff #fff #808080;}
+.sol-btn.green{color:#008000;}
+.sol-btn.red{color:#cc0000;}
+.sol-area{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.sol-top{display:flex;gap:8px;padding:6px 8px 4px;align-items:flex-start;}
+.sol-pile-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.sol-pile-label{font-size:9px;color:#808080;font-family:Arial,sans-serif;}
 
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--body);
-  font-size: 1rem;
-  line-height: 1.7;
-  min-height: 100vh;
-  background-color: var(--bg);
-  color: var(--text);
-}
+/* Win98 card dimensions */
+.sol-card{width:71px;height:96px;background:#fff;border:1px solid #000;border-radius:1px;position:relative;cursor:pointer;flex-shrink:0;user-select:none;}
+.sol-card:hover{outline:2px solid #000080;z-index:10;}
+.sol-card.selected{outline:2px solid #ffcc00;z-index:10;}
+.sol-card.red{color:#cc0000;}
+.sol-card.black{color:#000;}
+.sol-card.face-down{background:#000080;color:#fff;border-color:#000;}
+/* Card back: diagonal stripe pattern */
+.sol-card.face-down::before{content:'';position:absolute;inset:3px;background:repeating-linear-gradient(45deg,#1a3a9a 0,#1a3a9a 4px,#000080 4px,#000080 8px);border:1px solid #000;}
+.sol-card.face-down::after{content:'';position:absolute;inset:3px;border:1px solid #3a6aaa;}
 
-/* ── Hero ── */
-.hero {
-  padding: 6rem 2rem 5rem;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-  background: var(--bg);
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(59,130,246,0.12), transparent 70%);
-  pointer-events: none;
-  animation: heroGradient 15s ease infinite;
-}
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent, var(--bg) 70%);
-  pointer-events: none;
-  opacity: 0.8;
-}
+/* Corner rank */
+.sol-corner{position:absolute;display:flex;flex-direction:column;align-items:center;line-height:1;}
+.sol-corner-tl{top:2px;left:3px;}
+.sol-corner-br{bottom:2px;right:3px;transform:rotate(180deg);}
+.sol-corner-rank{font-size:14px;font-weight:bold;font-family:Arial,sans-serif;}
+.sol-corner-suit{font-size:12px;line-height:1;}
+.sol-corner-br .sol-corner-rank{font-size:11px;}
 
-@keyframes heroGradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-.hero-eyebrow {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent2);
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-}
-.hero-eyebrow::before, .hero-eyebrow::after {
-  content: '';
-  width: 2rem;
-  height: 1px;
-  background: var(--accent2);
-  opacity: 0.4;
-}
-.hero h1 {
-  font-family: var(--display);
-  font-size: clamp(2.5rem, 7vw, 4.5rem);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  color: #fff;
-  margin-bottom: 1.25rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-.hero h1 span { color: var(--accent2); }
-.hero-sub {
-  font-size: 1.125rem;
-  color: var(--muted);
-  max-width: 560px;
-  margin: 0 auto 2.5rem;
-  line-height: 1.7;
-}
-.hero-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: center;
-  margin-bottom: 2.5rem;
-}
-.pill {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  background: var(--bg2);
-  transition: var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-.pill:hover {
-  background: var(--bg3);
-  transform: translateY(-2px);
-}
+/* Center suit symbol */
+.sol-center-suit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:36px;line-height:1;font-family:Arial,sans-serif;}
 
-/* Floating animation for pills */
-.pill:nth-child(odd) {
-  animation: float 6s ease-in-out infinite;
-}
-.pill:nth-child(even) {
-  animation: float 8s ease-in-out infinite;
-}
+/* Foundation slots */
+.sol-foundation{width:71px;height:96px;border:2px dashed #808080;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background:#f0f0f0;}
+.sol-foundation.has-card{border:2px solid #808080;background:#fff;}
 
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-}
-.hero-links {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0.6rem 1.3rem;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.15s;
-  cursor: pointer;
-  border: none;
-}
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: #2563eb; }
-.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border2); }
-.btn-ghost:hover { background: var(--bg3); border-color: var(--border2); }
+/* Waste slot */
+.sol-waste-slot{width:71px;height:96px;border:2px solid #808080;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;background:#fff;}
 
-/* ── Main layout ── */
-.main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 4rem 1.5rem 6rem;
-}
-
-/* ── Section headers ── */
-.section-title {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent2);
-  margin-bottom: 0.75rem;
-}
-.section-heading {
-  font-family: var(--display);
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.75rem;
-}
-.section-desc {
-  color: var(--muted);
-  font-size: 1rem;
-  margin-bottom: 2rem;
-  max-width: 600px;
-  line-height: 1.7;
-}
-
-/* ── Card ── */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-normal);
-}
-.card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg3);
-}
-.card-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text);
-}
-.card-body {
-  padding: 1.5rem;
-}
-
-/* ── Tabs ── */
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg3);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-}
-.tab {
-  padding: 1rem 1.5rem;
-  font-size: 0.875rem;
-  color: var(--muted);
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all var(--transition-normal);
-  white-space: nowrap;
-  background: none;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  font-family: var(--body);
-  position: relative;
-  overflow: hidden;
-}
-.tab:hover {
-  color: var(--text);
-  background: rgba(255,255,255,0.03);
-}
-.tab.active {
-  color: var(--accent2);
-  border-bottom-color: var(--accent2);
-  font-weight: 500;
-  background: var(--bg2);
-}
-.tab.active::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--accent2);
-}
-
-.panel {
-  display: none;
-  padding: 2rem;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.panel.active {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ── KPI row ── */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-.kpi {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem 1.5rem;
-  transition: var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-.kpi:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-.kpi::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: var(--accent2);
-  opacity: 0;
-  transition: var(--transition-normal);
-}
-.kpi:hover::before {
-  opacity: 1;
-}
-.kpi-label {
-  font-size: 0.75rem;
-  font-family: var(--mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-.kpi-val {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #fff;
-  margin: 0.5rem 0;
-  transition: var(--transition-normal);
-}
-.kpi-val.green { color: var(--green); }
-.kpi-val.amber { color: var(--amber); }
-.kpi-sub {
-  font-size: 0.875rem;
-  color: var(--muted);
-  margin-top: 0.25rem;
-}
-
-/* Pulse animation for KPI updates */
-@keyframes kpi-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.kpi-val.updating {
-  animation: kpi-pulse 0.6s ease-in-out;
-}
-
-/* ── Filters ── */
-.filter-row {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.select-wrap {
-  position: relative;
-  min-width: 120px;
-}
-select {
-  appearance: none;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-md);
-  color: var(--text);
-  font-size: 0.875rem;
-  font-family: var(--body);
-  padding: 0.5rem 2.5rem 0.5rem 1rem;
-  cursor: pointer;
-  transition: var(--transition-normal);
-}
-.select-wrap::after {
-  content: '▾';
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--muted);
-  font-size: 0.75rem;
-  pointer-events: none;
-  transition: var(--transition-fast);
-}
-select:hover {
-  border-color: var(--border3);
-  background: var(--bg2);
-}
-select:focus {
-  outline: none;
-  border-color: var(--accent2);
-  box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
-}
-.select-wrap.select-focus::after {
-  color: var(--accent2);
-}
-.spacer {
-  flex: 1;
-  min-width: 0;
-}
-
-/* ── Currency pills ── */
-.cx-row {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-.cx-btn {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  background: transparent;
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-.cx-btn.active {
-  background: rgba(59,130,246,0.15);
-  color: var(--accent2);
-  border-color: var(--accent);
-}
-.cx-btn:hover:not(.active) {
-  background: var(--bg3);
-  color: var(--text);
-  transform: translateY(-1px);
-}
-.cx-btn:active {
-  transform: translateY(0);
-}
-
-/* ── Fare table ── */
-.fare-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 0.875rem;
-}
-.fare-table th {
-  text-align: left;
-  font-size: 0.75rem;
-  font-family: var(--mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 0.75rem 1rem;
-  border-bottom: 2px solid var(--border);
-  background: var(--bg3);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.fare-table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  color: var(--text);
-  vertical-align: middle;
-  transition: var(--transition-normal);
-}
-.fare-table tr:last-child td {
-  border-bottom: none;
-}
-.fare-table tbody tr:hover td {
-  background: var(--bg2);
-  transform: translateX(4px);
-}
-.fare-table tbody tr:hover td:first-child {
-  font-weight: 500;
-}
-
-.dot {
-  display: inline-block;
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  margin-right: 0.5rem;
-  flex-shrink: 0;
-}
-.dot-pa { background: #3b82f6; }
-.dot-pk { background: #22c55e; }
-.dot-er { background: #f59e0b; }
-.dot-q8 { background: #a78bfa; }
-
-.price-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.price-bar {
-  height: 0.25rem;
-  border-radius: 0.125rem;
-  background: var(--accent);
-  opacity: 0.6;
-  flex-grow: 1;
-}
-.price-lo { color: var(--green); font-weight: 500; }
-.price-mid { color: var(--amber); font-weight: 500; }
-.price-hi { color: var(--red); font-weight: 500; }
-
-.tag {
-  display: inline-block;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: var-radius-lg;
-  font-family: var(--mono);
-  font-weight: 500;
-}
-.tag-best {
-  background: var(--green-bg);
-  color: var(--green);
-}
-.tag-direct {
-  background: rgba(59,130,246,0.12);
-  color: var(--accent2);
-}
-
-/* ── Matrix ── */
-.matrix-wrap {
-  overflow-x: auto;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  background: var(--bg2);
-  margin: 1.5rem 0;
-}
-.matrix-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 0.75rem;
-}
-.matrix-table th {
-  font-size: 0.75rem;
-  font-family: var(--mono);
-  color: var(--muted);
-  padding: 0.75rem 0.5rem;
-  border: 1px solid var(--border);
-  background: var(--bg3);
-  text-align: center;
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-.matrix-table td {
-  padding: 0.75rem 0.5rem;
-  border: 1px solid var(--border);
-  text-align: center;
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  white-space: nowrap;
-  transition: var(--transition-normal);
-  position: relative;
-}
-.matrix-table td:hover {
-  background: var(--bg3);
-  transform: scale(1.05);
-  z-index: 15;
-}
-.matrix-table td.route-label {
-  text-align: left;
-  font-family: var(--body);
-  font-weight: 500;
-  color: var(--text);
-  background: var(--bg3);
-  white-space: nowrap;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-.cell-lo  {
-  background: rgba(34,197,94,0.12);
-  color: #4ade80;
-}
-.cell-mid {
-  background: rgba(245,158,11,0.12);
-  color: #fbbf24;
-}
-.cell-hi  {
-  background: rgba(239,68,68,0.12);
-  color: #f87171;
-}
-
-/* ── Scraper sim ── */
-.scraper-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  margin-bottom: 1.5rem;
-}
-.sim-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.875rem;
-  transition: var(--transition-normal);
-}
-.sim-row:last-child {
-  border-bottom: none;
-}
-.sim-row:hover {
-  background: var(--bg2);
-  transform: translateX(4px);
-}
-.sim-sector {
-  font-family: var(--mono);
-  flex: 1;
-  color: var(--text);
-  font-weight: 500;
-}
-.sim-price {
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  color: var(--muted);
-}
-.sim-badge {
-  font-size: 0.75rem;
-  font-family: var(--mono);
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-lg);
-  font-weight: 500;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-.badge-wait  {
-  background: var(--bg);
-  color: var(--subtle);
-  border: 1px solid var(--border);
-}
-.badge-run   {
-  background: rgba(245,158,11,0.12);
-  color: var(--amber);
-  animation: pulse 2s infinite;
-}
-.badge-done  {
-  background: var(--green-bg);
-  color: var(--green);
-}
-
-@keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
-}
-
-/* ── Log terminal ── */
-.log-terminal {
-  background: #060a10;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1rem;
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  line-height: 1.75;
-  color: #4ade80;
-  max-height: 250px;
-  overflow-y: auto;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
-}
-.log-terminal::-webkit-scrollbar {
-  width: 6px;
-}
-.log-terminal::-webkit-scrollbar-track {
-  background: var(--bg);
-}
-.log-terminal::-webkit-scrollbar-thumb {
-  background: var(--subtle);
-  border-radius: 3px;
-}
-.log-terminal::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
-}
-.log-g { color: var(--muted); }
-.log-b { color: var(--accent2); }
-.log-y { color: #fbbf24; }
-.log-w { color: #e8ecf4; }
-.log-r { color: #f87171; }
-
-/* ── Architecture ── */
-.arch-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.arch-item {
-  display: flex;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  border-radius: var(--radius-md);
-  background: var(--bg2);
-  position: relative;
-  overflow: hidden;
-}
-.arch-item:last-child {
-  border-bottom: none;
-}
-.arch-item:hover {
-  background: var(--bg3);
-  transform: translateX(4px);
-}
-.arch-item:hover .arch-num {
-  transform: scale(1.1);
-}
-.arch-item::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: var(--accent2);
-  opacity: 0;
-  transition: var(--transition-normal);
-}
-.arch-item:hover::before {
-  opacity: 1;
-}
-.arch-num {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  font-weight: 500;
-  flex-shrink: 0;
-}
-.arch-num-blue   {
-  background: rgba(59,130,246,0.15);
-  color: var(--accent2);
-}
-.arch-num-amber  {
-  background: rgba(245,158,11,0.12);
-  color: #fbbf24;
-}
-.arch-num-green  {
-  background: var(--green-bg);
-  color: var(--green);
-}
-.arch-num-purple {
-  background: rgba(167,139,250,0.12);
-  color: #a78bfa;
-}
-.arch-num-teal   {
-  background: rgba(20,184,166,0.12);
-  color: #2dd4bf;
-}
-.arch-content {
-  flex: 1;
-  min-width: 0;
-}
-.arch-title {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-}
-.arch-desc {
-  font-size: 0.875rem;
-  color: var(--muted);
-  line-height: 1.6;
-}
-.tech-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-.tech-tag {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: var-radius-lg;
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  transition: var(--transition-normal);
-}
-.tech-tag:hover {
-  background: var(--bg3);
-  transform: translateY(-2px);
-}
-.arch-arrow {
-  color: var(--muted);
-  font-size: 1rem;
-  flex-shrink: 0;
-  margin-top: 0.75rem;
-  opacity: 0.4;
-  transition: var(--transition-normal);
-}
-.arch-item:hover .arch-arrow {
-  opacity: 0.6;
-}
-
-/* ── Architecture diagram (SVG) section ── */
-.diagram-section { margin-top: 2.5rem; }
-.pipeline-diagram { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; overflow-x: auto; }
-.pipeline-diagram svg { display: block; margin: 0 auto; }
-
-/* ── About strip ── */
-.about-strip {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-top: 3rem;
-  padding-top: 2.5rem;
-  border-top: 1px solid var(--border);
-}
-.about-card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  padding: 2rem;
-  transition: var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-.about-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-.about-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: var(--accent2);
-  opacity: 0;
-  transition: var(--transition-normal);
-}
-.about-card:hover::before {
-  opacity: 1;
-}
-.about-card h3 {
-  font-family: var(--display);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.about-card p {
-  font-size: 1rem;
-  color: var(--muted);
-  line-height: 1.7;
-  margin-bottom: 1.5rem;
-}
-.about-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--accent2);
-  text-decoration: none;
-  margin-top: 0.5rem;
-  transition: var(--transition-normal);
-}
-.about-link:hover {
-  text-decoration: underline;
-  opacity: 0.8;
-}
-.about-link svg {
-  width: 1rem;
-  height: 1rem;
-}
-
-/* ── Footer ── */
-footer {
-  text-align: center;
-  padding: 2.5rem 1.5rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.875rem;
-  color: var(--muted);
-  font-family: var(--mono);
-  margin-top: 3rem;
-}
-footer a {
-  color: var(--accent2);
-  text-decoration: none;
-  transition: var(--transition-normal);
-}
-footer a:hover {
-  text-decoration: underline;
-  opacity: 0.8;
-}
-
-/* ── Run button ── */
-.run-btn {
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  padding: 0.5rem 1.25rem;
-  border-radius: var(--radius-md);
-  background: rgba(59,130,246,0.15);
-  color: var(--accent2);
-  border: 1px solid var(--accent);
-  cursor: pointer;
-  transition: all var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.run-btn:hover:not(:disabled) {
-  background: rgba(59,130,246,0.25);
-  transform: translateY(-2px);
-}
-.run-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-.run-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-.run-btn.running {
-  background: var(--green);
-  color: #fff;
-  animation: pulse 1.5s infinite;
-}
-.run-btn.running:hover {
-  background: var(--green);
-  transform: translateY(-2px);
-}
-.run-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transition: var(--transition-slow);
-}
-.run-btn:hover::before {
-  left: 100%;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(34,197,94,0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(34,197,94,0);
-  }
-}
-
-/* ── Tooltip ── */
-.fare-tooltip {
-  font-family: var(--body);
-  border: 1px solid var(--border2);
-  border-radius: var(--radius-md);
-  padding: 0.75rem;
-  background: var(--bg2);
-  box-shadow: var(--shadow-md);
-  z-index: 1000;
-  font-size: 0.875rem;
-  max-width: 200px;
-}
-
-/* ── Export Button ── */
-.export-btn {
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-md);
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.export-btn:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
-}
-.export-btn:active {
-  transform: translateY(0);
-}
-
-/* ── Accessibility Enhancements -- */
-/* Focus visible styles for keyboard users */
-:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
-}
-
-/* Skip to main content link */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--bg2);
-  color: var(--text);
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  z-index: 1000;
-  transition: top 0.3s ease;
-}
-.skip-link:focus {
-  top: 0;
-}
-
-/* Enhanced focus states for interactive elements */
-button:focus-visible,
-.select-wrap select:focus-visible,
-.tab:focus-visible,
-.cx-btn:focus-visible,
-.arch-item:focus-visible,
-.about-link:focus-visible,
-.export-btn:focus-visible,
-.run-btn:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
-}
-
-/* Reduce motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-/* ── Responsive ── */
-@media (max-width: 640px) {
-  .kpi-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .about-strip {
-    grid-template-columns: 1fr;
-  }
-  .hero h1 {
-    font-size: 2.25rem;
-  }
-  .hero {
-    padding: 4rem 1.5rem 3rem;
-  }
-  .section-heading {
-    font-size: 1.5rem;
-  }
-  .card-body {
-    padding: 1rem;
-  }
-  .filter-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .select-wrap {
-    min-width: auto;
-  }
-  .cx-row {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .arch-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .arch-num {
-    margin-top: 0;
-  }
-  .arch-arrow {
-    margin: 1rem 0;
-  }
-}
-@media (max-width: 480px) {
-  .kpi-row {
-    grid-template-columns: 1fr;
-  }
-  .hero {
-    padding: 3rem 1rem 2rem;
-  }
-  .hero-eyebrow {
-    font-size: 0.625rem;
-  }
-  .hero h1 {
-    font-size: 2rem;
-  }
-  .hero-sub {
-    font-size: 0.95rem;
-  }
-  .tabs {
-    flex-wrap: wrap;
-  }
-  .tab {
-    padding: 0.75rem 1rem;
-    font-size: 0.75rem;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
-}
+/* Tableau */
+.sol-tableau{flex:1;display:flex;gap:8px;padding:4px 8px 8px;min-height:0;overflow-y:auto;overflow-x:hidden;align-items:flex-start;}
+.sol-col{width:71px;display:flex;flex-direction:column;min-height:96px;position:relative;flex-shrink:0;}
+.sol-col-placeholder{width:71px;height:96px;border:2px dashed #aaa;background:#f8f8f8;cursor:pointer;position:absolute;top:0;left:0;}
+.sol-col-placeholder:hover{background:#e0e0e0;}
+.sol-card-in-col{position:absolute;left:0;}
+.sol-status{font-size:10px;color:#808080;padding:2px 8px;border-top:1px solid #808080;flex-shrink:0;display:flex;justify-content:space-between;}
+.sol-stat-bar{height:20px;border-top:1px solid #808080;display:flex;align-items:center;padding:0 8px;font-size:10px;flex-shrink:0;gap:12px;color:#444;}
 </style>
 </head>
 <body>
-  <a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="wallpaper"></div>
+<div class="desktop" id="desktop">
+  <div class="icon" ondblclick="openWin('about')" onclick="selIcon(this)"><div class="icon-img">🖥️</div><div class="icon-label">About Hamza</div></div>
+  <div class="icon" ondblclick="openWin('projects')" onclick="selIcon(this)"><div class="icon-img">📁</div><div class="icon-label">Projects</div></div>
+  <div class="icon" ondblclick="openWin('skills')" onclick="selIcon(this)"><div class="icon-img">⚙️</div><div class="icon-label">Skills.exe</div></div>
+  <div class="icon" ondblclick="openWin('cv')" onclick="selIcon(this)"><div class="icon-img">📄</div><div class="icon-label">Resume.doc</div></div>
+  <div class="icon" ondblclick="openWin('contact')" onclick="selIcon(this)"><div class="icon-img">✉️</div><div class="icon-label">Contact</div></div>
+  <div class="icon" ondblclick="openWin('ie')" onclick="selIcon(this)"><div class="icon-img">🌐</div><div class="icon-label">Internet Explorer</div></div>
+  <div class="icon" ondblclick="openWin('skysync')" onclick="selIcon(this)"><div class="icon-img">✈️</div><div class="icon-label">SkySync Pro</div></div>
+  <div class="icon" ondblclick="openWin('solitaire')" onclick="selIcon(this)"><div class="icon-img">🃏</div><div class="icon-label">Solitaire</div></div>
+  <div class="icon" ondblclick="showMsg('Recycle Bin is empty. No items to restore.')" onclick="selIcon(this)"><div class="icon-img">🗑️</div><div class="icon-label">Recycle Bin</div></div>
+</div>
 
-  <!-- ── HERO ── -->
-<header class="hero">
-  <div class="hero-eyebrow">Portfolio · Revenue Management &amp; Analytics Automation</div>
-  <h1>Fare Intelligence<br><span>Suite</span></h1>
-  <p class="hero-sub">Automated market intelligence and live fare comparison pipelines built to support dynamic airline pricing and yield optimization strategies.</p>
-  <div class="hero-pills">
-    <span class="pill">Python</span>
-    <span class="pill">Playwright</span>
-    <span class="pill">Streamlit</span>
-    <span class="pill">gspread</span>
-    <span class="pill">Pandas</span>
-    <span class="pill">VBA / Excel</span>
-    <span class="pill">PKR · USD · AED · SAR · GBP</span>
+<!-- ABOUT -->
+<div class="win" id="win-about" style="left:80px;top:50px;width:440px;height:370px;">
+  <div class="win-title" id="title-about">
+    <div class="win-title-text"><span>🖥️</span> About Hamza Sarfraz — Properties</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('about')">_</button><button class="win-btn" onclick="maxWin('about')">□</button><button class="win-btn" onclick="closeWin('about')">x</button></div>
   </div>
-  <div class="hero-links">
-    <a href="https://github.com/HamzaSarfrazz" class="btn btn-primary" target="_blank">GitHub Profile ↗</a>
-    <a href="https://www.linkedin.com/in/hamza-sarfraz-b83221185" class="btn btn-ghost" target="_blank">LinkedIn ↗</a>
-  </div>
-</header>
-
-<!-- ── MAIN ── -->
-<main class="main" id="main-content">
-
-  <!-- Dashboard section -->
-  <div style="margin-bottom: 2rem;">
-    <div class="section-title">Live demo</div>
-    <div class="section-heading">Fare comparison dashboard</div>
-    <div class="section-desc">Synthetic data modelled on real domestic and international route pricing. Filter by region, airline, or currency — exactly as the production RM dashboard works.</div>
-  </div>
-
-  <div class="card">
-    <div class="tabs">
-      <button class="tab active" onclick="showTab('dashboard',this)">Live dashboard</button>
-      <button class="tab" onclick="showTab('matrix',this)">Fare matrix</button>
-      <button class="tab" onclick="showTab('scraper',this)">Scraper sim</button>
-      <button class="tab" onclick="showTab('arch',this)">Architecture</button>
+  <div class="win-menubar"><span class="win-menu-item">File</span><span class="win-menu-item">Edit</span><span class="win-menu-item">View</span><span class="win-menu-item">Help</span></div>
+  <div class="win-body">
+    <div style="display:flex;gap:12px;margin-bottom:8px;">
+      <div style="width:72px;height:72px;flex-shrink:0;border:2px solid;border-color:#808080 #fff #fff #808080;background:linear-gradient(135deg,#000080,#1084d0);display:flex;align-items:center;justify-content:center;font-size:42px;color:#fff;font-weight:bold;">H</div>
+      <div style="font-size:11px;line-height:1.8;">
+        <div style="font-size:14px;font-weight:bold;color:#000080;">Hamza Sarfraz</div>
+        <div><b>Title:</b> Revenue Management Analyst</div>
+        <div><b>Company:</b> Airblue</div>
+        <div><b>Location:</b> Islamabad, Pakistan</div>
+        <div><b>Education:</b> BS Statistics, QAU</div>
+        <div><b>Status:</b> <span style="color:#008000;">●</span> Open to opportunities</div>
+      </div>
     </div>
+    <div class="w-divider"></div>
+    <div class="w-groupbox"><div class="w-groupbox-title">Biography</div>
+      <div style="font-size:11px;line-height:1.7;padding-top:4px;">Revenue Management Analyst at Airblue with $1.2M+ in documented revenue uplift. Specialist in booking curve analysis, pick-up forecasting, and O&D pricing strategy — with full-stack capability to build the data pipelines that power these decisions.</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <div style="flex:1;border:2px solid;border-color:#808080 #fff #fff #808080;padding:4px;text-align:center;background:#fff;"><div style="font-size:18px;color:#000080;font-weight:bold;">$1.2M+</div><div style="font-size:10px;">Revenue Uplift</div></div>
+      <div style="flex:1;border:2px solid;border-color:#808080 #fff #fff #808080;padding:4px;text-align:center;background:#fff;"><div style="font-size:18px;color:#000080;font-weight:bold;">24</div><div style="font-size:10px;">Routes Managed</div></div>
+      <div style="flex:1;border:2px solid;border-color:#808080 #fff #fff #808080;padding:4px;text-align:center;background:#fff;"><div style="font-size:18px;color:#000080;font-weight:bold;">25%</div><div style="font-size:10px;">Forecast Accuracy +</div></div>
+    </div>
+  </div>
+  <div class="win-statusbar"><div class="statusbar-pane">Hamza Sarfraz Portfolio v2.0</div></div>
+  <div class="resize-handle" id="resize-about"></div>
+</div>
 
-    <!-- Dashboard tab -->
-    <div id="panel-dashboard" class="panel active">
-      <div class="kpi-row">
-        <div class="kpi"><div class="kpi-label">Sectors monitored</div><div class="kpi-val">12</div><div class="kpi-sub">UAE · KSA · UK</div></div>
-        <div class="kpi"><div class="kpi-label">Airlines tracked</div><div class="kpi-val">4</div><div class="kpi-sub">PA, PK, ER, Q8</div></div>
-        <div class="kpi"><div class="kpi-label">Best fare today</div><div class="kpi-val green" id="best-fare">PKR 54,200</div><div class="kpi-sub" id="best-route">KHI → DXB · Air Blue</div></div>
-        <div class="kpi"><div class="kpi-label">Avg vs yesterday</div><div class="kpi-val amber">−3.2%</div><div class="kpi-sub">Fares trending down</div></div>
+<!-- PROJECTS -->
+<div class="win" id="win-projects" style="left:200px;top:70px;width:500px;height:420px;">
+  <div class="win-title" id="title-projects">
+    <div class="win-title-text"><span>📁</span> Projects — File Manager</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('projects')">_</button><button class="win-btn" onclick="maxWin('projects')">□</button><button class="win-btn" onclick="closeWin('projects')">x</button></div>
+  </div>
+  <div class="win-menubar"><span class="win-menu-item">File</span><span class="win-menu-item">Edit</span><span class="win-menu-item">View</span><span class="win-menu-item">Go</span><span class="win-menu-item">Favourites</span><span class="win-menu-item">Help</span></div>
+  <div style="background:#c0c0c0;border-bottom:1px solid #808080;padding:2px 4px;display:flex;align-items:center;gap:4px;font-size:11px;flex-shrink:0;">
+    <div class="w-btn" style="padding:2px 8px;">Back</div>
+    <div class="w-btn" style="padding:2px 8px;">Fwd</div>
+    <div style="flex:1;height:20px;border:2px solid;border-color:#808080 #fff #fff #808080;background:#fff;padding:1px 6px;font-size:11px;">C:\Hamza\Projects\</div>
+  </div>
+  <div class="win-body" style="padding:4px;">
+    <div class="proj-list">
+      <div class="proj-item"><div class="proj-title">📊 AERO_X Revenue Dashboard</div><div class="proj-desc">Real-time market intelligence platform monitoring daily fare fluctuations across competitor carriers. Altea/Amadeus-style parsing with NEXUS, COMPARE, BOOKING_CURVE & HISTORY tabs. Contributed to 15% yield improvement on monitored routes.</div><div class="proj-tech">Python · Streamlit · Plotly · Supabase · Pandas</div></div>
+      <div class="proj-item" ondblclick="openWin('skysync')" title="Double-click to open SkySync Pro"><div class="proj-title">🌐 SkySync Pro — Fare Scraping Engine <span style="color:#808080;font-weight:normal;font-size:10px;">[double-click to open]</span></div><div class="proj-desc">Multi-region flight fare scraping engine targeting Pakistan, UAE &amp; KSA routes. Decrypts POST responses from complex travel APIs (sastaticket.pk). Google Sheets output with color-coded Airblue vs competitor comparison. Feeds pricing models with 95% forecast accuracy improvement.</div><div class="proj-tech">Python · Playwright · Streamlit · Next.js · Supabase · Google Sheets API</div></div>
+      <div class="proj-item"><div class="proj-title">📋 Group Quotes Management System</div><div class="proj-desc">6-table Supabase schema replacing manual group-booking workflow. Closed-loop fare suggestion based on load % and days to departure. Automates pricing decisions for group travel operations.</div><div class="proj-tech">Supabase · PostgreSQL · Python · Streamlit</div></div>
+      <div class="proj-item"><div class="proj-title">📈 Fare Comparison Matrix Generator</div><div class="proj-desc">Automated Google Apps Script that cleans, organises, and standardises raw flight data into a structured Google Sheets fare matrix. Reduced manual data preparation time by 90%, enabling faster O&D-level competitive fare analysis.</div><div class="proj-tech">Google Apps Script · Python · gspread · Google Sheets</div></div>
+      <div class="proj-item"><div class="proj-title">📉 Power BI Revenue Dashboards</div><div class="proj-desc">Commercial planning dashboards for route performance, load factor trends, and yield reporting at Airblue. RASK/CASK modelling and yield optimization across 24 domestic & international routes.</div><div class="proj-tech">Power BI · DAX · Excel · SQL</div></div>
+    </div>
+  </div>
+  <div class="win-statusbar"><div class="statusbar-pane">5 object(s)</div></div>
+  <div class="resize-handle" id="resize-projects"></div>
+</div>
+
+<!-- SKILLS -->
+<div class="win" id="win-skills" style="left:340px;top:90px;width:380px;height:400px;">
+  <div class="win-title" id="title-skills">
+    <div class="win-title-text"><span>⚙️</span> Skills — System Properties</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('skills')">_</button><button class="win-btn" onclick="maxWin('skills')">□</button><button class="win-btn" onclick="closeWin('skills')">x</button></div>
+  </div>
+  <div class="win-body">
+    <div class="w-groupbox"><div class="w-groupbox-title">Revenue Management</div>
+      <div style="padding-top:4px;">
+        <div class="skill-row"><div class="skill-name"><span>Fare Pricing & Inventory</span><span>95%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:95%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>Altea / Amadeus</span><span>88%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:88%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>Booking Curve Analysis</span><span>92%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:92%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>O&D Pricing Strategy</span><span>88%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:88%"></div></div></div>
       </div>
-
-      <div class="filter-row">
-        <div class="select-wrap"><select id="region-filter" onchange="renderFareTable()">
-          <option value="all">All regions</option>
-          <option value="UAE">UAE</option>
-          <option value="KSA">KSA</option>
-          <option value="UK">UK</option>
-        </select></div>
-        <div class="select-wrap"><select id="airline-filter" onchange="renderFareTable()">
-          <option value="all">All airlines</option>
-          <option value="PA">Air Blue (PA)</option>
-          <option value="PK">PIA (PK)</option>
-          <option value="ER">Kam Air (ER)</option>
-          <option value="Q8">Kuwait Airways (Q8)</option>
-        </select></div>
-        <div class="spacer"></div>
-        <div class="cx-row">
-          <button class="cx-btn active" onclick="setCurrency('PKR',this)">PKR</button>
-          <button class="cx-btn" onclick="setCurrency('USD',this)">USD</button>
-          <button class="cx-btn" onclick="setCurrency('AED',this)">AED</button>
-          <button class="cx-btn" onclick="setCurrency('SAR',this)">SAR</button>
-          <button class="cx-btn" onclick="setCurrency('GBP',this)">GBP</button>
-        </div>
+    </div>
+    <div class="w-groupbox"><div class="w-groupbox-title">Data & Analytics</div>
+      <div style="padding-top:4px;">
+        <div class="skill-row"><div class="skill-name"><span>Python (Pandas, NumPy)</span><span>90%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:90%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>SQL & Databases</span><span>88%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:88%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>Power BI / DAX</span><span>82%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:82%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>Advanced Excel</span><span>92%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:92%"></div></div></div>
       </div>
+    </div>
+    <div class="w-groupbox"><div class="w-groupbox-title">Web & Automation</div>
+      <div style="padding-top:4px;">
+        <div class="skill-row"><div class="skill-name"><span>Streamlit / Plotly</span><span>88%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:88%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>Playwright / Web Scraping</span><span>85%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:85%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>Next.js / Supabase</span><span>72%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:72%"></div></div></div>
+        <div class="skill-row"><div class="skill-name"><span>Google Apps Script / gspread</span><span>80%</span></div><div class="w-progress"><div class="w-progress-bar" style="width:80%"></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="win-statusbar"><div class="statusbar-pane">All systems operational</div></div>
+  <div class="resize-handle" id="resize-skills"></div>
+</div>
 
-      <table class="fare-table">
-        <thead><tr>
-          <th>Route</th><th>Airline</th><th>Dep time</th><th>Fare</th><th>Stops</th><th>Tag</th>
-        </tr></thead>
-        <tbody id="fare-tbody"></tbody>
+<!-- CV -->
+<div class="win" id="win-cv" style="left:120px;top:50px;width:480px;height:520px;">
+  <div class="win-title" id="title-cv">
+    <div class="win-title-text"><span>📄</span> Hamza_Sarfraz_CV.doc — WordPad</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('cv')">_</button><button class="win-btn" onclick="maxWin('cv')">□</button><button class="win-btn" onclick="closeWin('cv')">x</button></div>
+  </div>
+  <div class="win-menubar"><span class="win-menu-item">File</span><span class="win-menu-item">Edit</span><span class="win-menu-item">View</span><span class="win-menu-item">Insert</span><span class="win-menu-item">Format</span><span class="win-menu-item">Help</span></div>
+  <div class="win-body" style="background:#fff;border:2px inset #808080;">
+    <div style="padding:10px;font-size:11px;line-height:1.7;">
+      <div style="text-align:center;margin-bottom:10px;">
+        <div style="font-size:18px;font-weight:bold;color:#000080;">HAMZA SARFRAZ</div>
+        <div style="font-size:11px;">Revenue Management Analyst · Airline Pricing & Demand Forecasting</div>
+        <div style="font-size:10px;color:#444;">Islamabad, Pakistan · +92 316 5297006</div>
+        <div style="font-size:10px;color:#000080;">hamzasarfraz.aah@gmail.com</div>
+      </div>
+      <div class="w-divider"></div>
+      <div style="margin-bottom:10px;">
+        <div style="background:#000080;color:#fff;padding:2px 6px;font-weight:bold;margin-bottom:6px;">KEY ACHIEVEMENTS</div>
+        <div style="margin-bottom:4px;">• Delivered <b>$1.2M+ annual revenue uplift</b> through pricing initiatives, dynamic inventory controls, and overbooking optimization across 24 domestic and international routes</div>
+        <div style="margin-bottom:4px;">• Improved demand forecast accuracy by <b>25%</b> via Python-based booking curve and pick-up analysis, reducing inventory mismatches and spoilage</div>
+        <div>• Increased RASM by <b>1.5% YoY</b> through dynamic booking class adjustments, sustaining load factors above 95% while lifting average fares on leisure routes</div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="background:#000080;color:#fff;padding:2px 6px;font-weight:bold;margin-bottom:6px;">EXPERIENCE</div>
+        <div style="font-weight:bold;">Revenue Management Analyst</div>
+        <div style="color:#000080;">Airblue</div>
+        <div style="color:#808080;font-size:10px;">Jan 2026 – Present · Islamabad, Pakistan</div>
+        <div style="margin-top:3px;padding-left:10px;">• Drove 5% yield improvement across 24 sectors — generating ~$100K/month incremental revenue — via real-time fare intelligence dashboard replacing 4+ analyst hours/day</div>
+        <div style="padding-left:10px;">• Recovered ~$50K in denied-boarding costs by building overbooking optimization models reducing overbooking incidents by 10% and improving RASM by 3%</div>
+        <div style="padding-left:10px;">• Generated ~$80K/month additional revenue on leisure routes by restructuring booking class availability, lifting average fare by 8% while sustaining load factors above 95%</div>
+        <div style="padding-left:10px;">• Eliminated cross-market pricing discrepancies by 2% with automated currency conversion pipelines (PKR to SAR/AED/GBP)</div>
+        <div style="margin-top:6px;font-weight:bold;">Concierge & Client Data Specialist</div>
+        <div style="color:#000080;">YQ Now Group</div>
+        <div style="color:#808080;font-size:10px;">Jan 2025 – Jan 2026 · Islamabad, Pakistan</div>
+        <div style="padding-left:10px;">• Cut reporting lag from 48hrs to under 8hrs for VIP travel operations by redesigning SQL-based data pipelines</div>
+        <div style="margin-top:6px;font-weight:bold;">Data Processing Analyst</div>
+        <div style="color:#000080;">AAH Cars</div>
+        <div style="color:#808080;font-size:10px;">Jan 2025 – Jan 2026 · Islamabad, Pakistan</div>
+        <div style="padding-left:10px;">• Improved query performance by 95% via MySQL optimization; increased reporting efficiency by 100% with Power BI dashboards</div>
+        <div style="margin-top:6px;font-weight:bold;">Freelance Data Analyst</div>
+        <div style="color:#000080;">Upwork</div>
+        <div style="color:#808080;font-size:10px;">Feb 2021 – Present · Remote</div>
+        <div style="padding-left:10px;">• Delivered custom forecasting models improving forecast accuracy by average 95% and reducing manual effort by 90% for international clients</div>
+      </div>
+      <div style="margin-bottom:10px;">
+        <div style="background:#000080;color:#fff;padding:2px 6px;font-weight:bold;margin-bottom:6px;">EDUCATION</div>
+        <div style="font-weight:bold;">BS Statistics</div>
+        <div style="color:#000080;">Quaid-e-Azam University (QAU), Islamabad</div>
+        <div style="color:#808080;font-size:10px;">2018 – 2022</div>
+        <div style="margin-top:4px;"><b>Certifications:</b> Excel to Power BI (Coursera) · Data Analyst with R (DataCamp) · Joining Data with SQL (DataCamp)</div>
+      </div>
+      <div style="margin-bottom:6px;">
+        <div style="background:#000080;color:#fff;padding:2px 6px;font-weight:bold;margin-bottom:4px;">TARGET MARKETS</div>
+        <div>UAE · Qatar · KSA · Southeast Asia · Jordan · Europe</div>
+      </div>
+    </div>
+  </div>
+  <div class="win-statusbar"><div class="statusbar-pane">For Help, press F1</div></div>
+  <div class="resize-handle" id="resize-cv"></div>
+</div>
+
+<!-- CONTACT -->
+<div class="win" id="win-contact" style="left:280px;top:110px;width:380px;height:330px;">
+  <div class="win-title" id="title-contact">
+    <div class="win-title-text"><span>✉️</span> Contact Hamza — Outlook Express</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('contact')">_</button><button class="win-btn" onclick="maxWin('contact')">□</button><button class="win-btn" onclick="closeWin('contact')">x</button></div>
+  </div>
+  <div class="win-menubar"><span class="win-menu-item">File</span><span class="win-menu-item">Edit</span><span class="win-menu-item">View</span><span class="win-menu-item">Insert</span><span class="win-menu-item">Tools</span></div>
+  <div style="border-bottom:1px solid #808080;padding:2px 4px;display:flex;gap:4px;flex-shrink:0;">
+    <div class="w-btn" style="padding:2px 8px;">Send</div>
+    <div class="w-btn" style="padding:2px 8px;">Cut</div>
+    <div class="w-btn" style="padding:2px 8px;">Copy</div>
+    <div class="w-btn" style="padding:2px 8px;">Paste</div>
+  </div>
+  <div class="win-body">
+    <div class="contact-field-row"><div class="contact-label">Email:</div><a href="mailto:hamzasarfraz.aah@gmail.com" class="contact-val" style="text-decoration:none;color:#000080;cursor:pointer;display:block;line-height:20px;" onclick="window.location.href='mailto:hamzasarfraz.aah@gmail.com'">hamzasarfraz.aah@gmail.com</a></div>
+    <div class="contact-field-row"><div class="contact-label">LinkedIn:</div><a href="https://www.linkedin.com/in/hamza-sarfraz-b83221185" target="_blank" class="contact-val" style="text-decoration:none;color:#000080;cursor:pointer;display:block;line-height:20px;">linkedin.com/in/hamza-sarfraz-b83221185</a></div>
+    <div class="contact-field-row"><div class="contact-label">GitHub:</div><a href="https://github.com/HamzaSarfrazz" target="_blank" class="contact-val" style="text-decoration:none;color:#000080;cursor:pointer;display:block;line-height:20px;">github.com/HamzaSarfrazz</a></div>
+    <div class="contact-field-row"><div class="contact-label">Phone:</div><a href="tel:+923165297006" class="contact-val" style="text-decoration:none;color:#000080;cursor:pointer;display:block;line-height:20px;">+92 316 5297006</a></div>
+    <div class="contact-field-row"><div class="contact-label">Location:</div><div class="contact-val" style="line-height:20px;">Islamabad, Pakistan (Open to Relocation)</div></div>
+    <div class="contact-field-row"><div class="contact-label">Targets:</div><div class="contact-val" style="line-height:20px;">UAE · Qatar · KSA · SE Asia · Jordan · Europe</div></div>
+    <div class="w-divider"></div>
+    <div style="font-size:11px;line-height:1.6;">Actively targeting RM and Data Analyst roles internationally. Let's connect!</div>
+    <div style="margin-top:8px;display:flex;gap:6px;">
+      <a href="mailto:hamzasarfraz.aah@gmail.com" class="w-btn" style="text-decoration:none;color:#000;">Send Email</a>
+      <a href="https://www.linkedin.com/in/hamza-sarfraz-b83221185" target="_blank" class="w-btn" style="text-decoration:none;color:#000;">View LinkedIn</a>
+      <a href="https://github.com/HamzaSarfrazz" target="_blank" class="w-btn" style="text-decoration:none;color:#000;">View GitHub</a>
+    </div>
+  </div>
+  <div class="resize-handle" id="resize-contact"></div>
+</div>
+
+<!-- IE -->
+<div class="win" id="win-ie" style="left:150px;top:40px;width:520px;height:420px;">
+  <div class="win-title" id="title-ie">
+    <div class="win-title-text"><span>🌐</span> Hamza Sarfraz Portfolio — Internet Explorer</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('ie')">_</button><button class="win-btn" onclick="maxWin('ie')">□</button><button class="win-btn" onclick="closeWin('ie')">x</button></div>
+  </div>
+  <div class="win-menubar"><span class="win-menu-item">File</span><span class="win-menu-item">Edit</span><span class="win-menu-item">View</span><span class="win-menu-item">Go</span><span class="win-menu-item">Favourites</span><span class="win-menu-item">Help</span></div>
+  <div style="border-bottom:1px solid #808080;padding:2px 4px;display:flex;align-items:center;gap:4px;font-size:11px;flex-shrink:0;">
+    <div class="w-btn" style="padding:2px 8px;">Back</div>
+    <div class="w-btn" style="padding:2px 8px;">Fwd</div>
+    <div class="w-btn" style="padding:2px 8px;">Stop</div>
+    <div class="w-btn" style="padding:2px 8px;">Refresh</div>
+    <div style="flex:1;height:20px;border:2px solid;border-color:#808080 #fff #fff #808080;background:#fff;padding:1px 6px;font-size:11px;">https://hamzasarfrazz.github.io/airline-revenue-portfolio/</div>
+    <div class="w-btn" style="padding:2px 10px;">Go</div>
+  </div>
+  <div class="win-body" style="background:#fff;border:2px inset #808080;overflow:auto;">
+    <div style="padding:12px;">
+      <div style="background:linear-gradient(135deg,#000080,#003380);color:#fff;padding:14px;text-align:center;margin-bottom:14px;border-radius:0;">
+        <div style="font-size:20px;font-weight:bold;">✈ Hamza Sarfraz — Portfolio</div>
+        <div style="font-size:12px;margin-top:4px;">Revenue Management Analyst · Airblue · Islamabad, Pakistan</div>
+        <div style="font-size:10px;margin-top:4px;color:#add8f6;">$1.2M+ Revenue Uplift · 24 Routes · Open to International Opportunities</div>
+        <div style="font-size:10px;margin-top:2px;color:#88aacc;">Powered by Microsoft Internet Explorer 5.0</div>
+      </div>
+      <table width="100%" cellspacing="4" style="font-size:11px;">
+        <tr>
+          <td width="50%" valign="top">
+            <div style="background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;padding:6px;">
+              <div style="font-weight:bold;color:#000080;border-bottom:1px solid #808080;margin-bottom:4px;">📂 Navigation</div>
+              <div style="padding:2px 0 2px 4px;cursor:pointer;" ondblclick="openWin('about')">🖥️ About Me</div>
+              <div style="padding:2px 0 2px 4px;cursor:pointer;" ondblclick="openWin('projects')">📁 Projects</div>
+              <div style="padding:2px 0 2px 4px;cursor:pointer;" ondblclick="openWin('skills')">⚙️ Skills</div>
+              <div style="padding:2px 0 2px 4px;cursor:pointer;" ondblclick="openWin('cv')">📄 Resume</div>
+              <div style="padding:2px 0 2px 4px;cursor:pointer;" ondblclick="openWin('contact')">✉️ Contact</div>
+            </div>
+          </td>
+          <td width="50%" valign="top">
+            <div style="background:#c0c0c0;border:2px solid;border-color:#fff #808080 #808080 #fff;padding:6px;">
+              <div style="font-weight:bold;color:#000080;border-bottom:1px solid #808080;margin-bottom:4px;">📰 Latest Updates</div>
+              <div style="line-height:2;font-size:11px;">
+                ✅ <b>Airblue RM Analyst</b> — Jan 2026<br>
+                💰 $1.2M+ revenue uplift delivered<br>
+                📊 AERO_X dashboard — 15% yield gain<br>
+                🌍 Target: UAE · Qatar · KSA · Jordan<br>
+                📄 CV updated Jun 2026
+              </div>
+            </div>
+          </td>
+        </tr>
       </table>
-    </div>
-
-    <!-- Matrix tab -->
-    <div id="panel-matrix" class="panel">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;">
-        <div>
-          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px;">7-day fare matrix</div>
-          <div style="font-size:12px;color:var(--muted);">Color = price tier relative to route average. Green = cheapest window.</div>
-        </div>
-        <div style="display:flex;gap:10px;font-size:11px;color:var(--muted);align-items:center;">
-          <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(34,197,94,0.2);display:inline-block;"></span>Best</span>
-          <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.2);display:inline-block;"></span>Mid</span>
-          <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(239,68,68,0.2);display:inline-block;"></span>High</span>
-        </div>
+      <div style="margin-top:10px;background:#f0f0f0;border:2px solid;border-color:#fff #808080 #808080 #fff;padding:6px;font-size:10px;">
+        <div style="font-weight:bold;color:#000080;margin-bottom:4px;">🎯 Career Targets</div>
+        <div>RM Strategy · Demand Forecasting · Fare Analytics · Competitive Intelligence</div>
+        <div style="margin-top:4px;"><b>Target markets:</b> UAE · Qatar · KSA · SE Asia · Jordan · Europe</div>
       </div>
-      <div class="matrix-wrap"><table class="matrix-table" id="matrix-table"></table></div>
-    </div>
-
-    <!-- Scraper sim tab -->
-    <div id="panel-scraper" class="panel">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <div>
-          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;">Scraper simulation</div>
-          <div style="font-size:12px;color:var(--muted);">Simulates the actual scraping loop: stall detection, retry logic, and Sheets push.</div>
-        </div>
-        <button class="run-btn" id="run-btn" onclick="runScraper()">▶ Run scraper</button>
-      </div>
-      <div class="scraper-grid" id="scraper-grid"></div>
-      <div class="log-terminal" id="log-box"><span class="log-g"># Click "Run scraper" to simulate a live session</span></div>
-    </div>
-
-    <!-- Architecture tab -->
-    <div id="panel-arch" class="panel">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:1.25rem;">Five-layer pipeline: from browser automation through to Google Sheets sync.</div>
-      <div class="arch-list">
-        <div class="arch-item">
-          <div class="arch-num arch-num-blue">01</div>
-          <div class="arch-content">
-            <div class="arch-title">Browser automation layer</div>
-            <div class="arch-desc">Playwright launches a persistent Chromium context with stealth mode. A JSON.parse hook intercepts flight batch payloads before the DOM renders them. Stall detection fires if zero data is received for 120s — browser auto-restarts, up to 3 retries per sector. A random 20–40s sleep between sectors mimics human browsing cadence.</div>
-            <div class="tech-row"><span class="tech-tag">playwright</span><span class="tech-tag">playwright-stealth</span><span class="tech-tag">chromium</span><span class="tech-tag">async_playwright</span></div>
-          </div>
-          <div class="arch-arrow">→</div>
-        </div>
-        <div class="arch-item">
-          <div class="arch-num arch-num-amber">02</div>
-          <div class="arch-content">
-            <div class="arch-title">Normalization &amp; parsing layer</div>
-            <div class="arch-desc">Raw JSON batches are de-duplicated by hash. Each flight is evaluated for non-stop status via a 3-condition check (leg count, segment count, stop label). Departure times are normalized to 12h format across date-time strings, ISO timestamps, and raw HH:MM values. Only the cheapest fare per (route, flight_number) pair is retained.</div>
-            <div class="tech-row"><span class="tech-tag">pandas</span><span class="tech-tag">regex</span><span class="tech-tag">datetime</span><span class="tech-tag">json</span></div>
-          </div>
-          <div class="arch-arrow">→</div>
-        </div>
-        <div class="arch-item">
-          <div class="arch-num arch-num-green">03</div>
-          <div class="arch-content">
-            <div class="arch-title">Multi-currency handling</div>
-            <div class="arch-desc">Each time slot (10am, 4pm, 6pm, 9pm) is independently configured with a target currency. The URL builder appends &amp;currency= for non-PKR requests; the API returns pre-converted prices in the payload. Coverage: PKR, USD, GBP, AED, SAR across 40+ airport code pairs in Domestic, UAE, and KSA markets.</div>
-            <div class="tech-row"><span class="tech-tag">PKR</span><span class="tech-tag">USD</span><span class="tech-tag">AED</span><span class="tech-tag">SAR</span><span class="tech-tag">GBP</span><span class="tech-tag">urllib.parse</span></div>
-          </div>
-          <div class="arch-arrow">→</div>
-        </div>
-        <div class="arch-item">
-          <div class="arch-num arch-num-purple">04</div>
-          <div class="arch-content">
-            <div class="arch-title">Google Sheets sync</div>
-            <div class="arch-desc">A CONFIG worksheet maps (route, flight_number) pairs to exact cell addresses. All fare and time updates are batched into a single batch_update() call to stay within Sheets API rate limits. Unmapped flights are logged separately for review. Timestamp cells update automatically on every push, giving RM staff a clear data-freshness indicator.</div>
-            <div class="tech-row"><span class="tech-tag">gspread</span><span class="tech-tag">google-oauth2</span><span class="tech-tag">batch_update</span><span class="tech-tag">Sheets API v4</span></div>
-          </div>
-          <div class="arch-arrow">→</div>
-        </div>
-        <div class="arch-item">
-          <div class="arch-num arch-num-teal">05</div>
-          <div class="arch-content">
-            <div class="arch-title">Streamlit Cloud deployment</div>
-            <div class="arch-desc">Deployed to Streamlit Cloud with Chromium installed at runtime via setup.sh. Secrets (GCP service account, spreadsheet IDs per slot) are stored in st.secrets. A persistent Queue bridges the background scraping thread to the Streamlit UI, enabling real-time log streaming and live data table updates without page refresh.</div>
-            <div class="tech-row"><span class="tech-tag">streamlit</span><span class="tech-tag">setup.sh</span><span class="tech-tag">st.secrets</span><span class="tech-tag">threading</span><span class="tech-tag">Queue</span></div>
-          </div>
-          <div class="arch-arrow">→</div>
-        </div>
-      </div>
+      <div style="text-align:center;margin-top:12px;font-size:10px;color:#808080;">Best viewed in Internet Explorer 5.0 at 800×600 · © 2026 Hamza Sarfraz</div>
     </div>
   </div>
+  <div class="win-statusbar"><div class="statusbar-pane">Done</div><div style="margin-left:auto;" class="statusbar-pane">Internet zone</div></div>
+  <div class="resize-handle" id="resize-ie"></div>
+</div>
 
-  <!-- Pipeline diagram -->
-  <div class="diagram-section">
-    <div style="margin-bottom:1.5rem;">
-      <div class="section-title">Pipeline overview</div>
-      <div class="section-heading">How data flows</div>
-      <div class="section-desc">From source URL construction to Google Sheets cell update — every stage in the pipeline.</div>
+<!-- SOLITAIRE -->
+<div class="win" id="win-solitaire" style="left:100px;top:30px;width:660px;height:540px;">
+  <div class="win-title" id="title-solitaire">
+    <div class="win-title-text"><span>🃏</span> Solitaire — Windows 98</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('solitaire')">_</button><button class="win-btn" onclick="maxWin('solitaire')">□</button><button class="win-btn" onclick="closeWin('solitaire')">x</button></div>
+  </div>
+  <div class="win-menubar"><span class="win-menu-item">Game</span><span class="win-menu-item">Edit</span><span class="win-menu-item">Help</span></div>
+  <div class="sol-header">
+    <button class="sol-btn green" onclick="solNewGame()">New Game</button>
+    <button class="sol-btn" onclick="solUndo()">Undo</button>
+    <button class="sol-btn" onclick="solHint()">Hint</button>
+    <button class="sol-btn" onclick="solAutoComplete()">Auto Complete</button>
+    <div style="flex:1"></div>
+    <div id="solScore" style="font-size:11px;padding:2px 6px;color:#000080;font-weight:bold;">Score: 0</div>
+    <div id="solMoves" style="font-size:11px;padding:2px 6px;color:#444;">Moves: 0</div>
+    <div id="solTime" style="font-size:11px;padding:2px 6px;color:#444;">Time: 0:00</div>
+  </div>
+  <div class="sol-area" id="solArea">
+    <div class="sol-top" id="solTop">
+      <!-- Deck -->
+      <div class="sol-pile-wrap">
+        <div id="solDeck" class="sol-card face-down" onclick="solDrawCard()"></div>
+        <div class="sol-pile-label" id="solDeckCount"></div>
+      </div>
+      <!-- Waste pile -->
+      <div class="sol-pile-wrap">
+        <div id="solWaste" class="sol-card" style="visibility:hidden;" onclick="solOnWasteClick()"></div>
+        <div class="sol-pile-label">Stock</div>
+      </div>
+      <div style="flex:1"></div>
+      <!-- Foundations: H D C S -->
+      <div id="solFound0" class="sol-foundation" onclick="solClickFoundation(0)"><span style="font-size:32px;color:#ccc;">&#9830;</span></div>
+      <div id="solFound1" class="sol-foundation" onclick="solClickFoundation(1)"><span style="font-size:32px;color:#ccc;">&#9829;</span></div>
+      <div id="solFound2" class="sol-foundation" onclick="solClickFoundation(2)"><span style="font-size:32px;color:#ccc;">&#9827;</span></div>
+      <div id="solFound3" class="sol-foundation" onclick="solClickFoundation(3)"><span style="font-size:32px;color:#ccc;">&#9824;</span></div>
     </div>
-    <div class="pipeline-diagram">
-      <svg width="100%" viewBox="0 0 960 160" role="img" xmlns="http://www.w3.org/2000/svg">
-        <title>Fare Intelligence Pipeline Flow</title>
-        <desc>Five-stage pipeline: URL Builder to Browser Scrape to Parse and Normalize to Currency Conversion to Sheets Push</desc>
-        <defs>
-          <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M2 1L8 5L2 9" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </marker>
-        </defs>
-
-        <!-- Stage boxes -->
-        <!-- 1: URL Builder -->
-        <rect x="20" y="44" width="148" height="72" rx="8" fill="#111827" stroke="#1d4ed8" stroke-width="1"/>
-        <text x="94" y="70" text-anchor="middle" fill="#60a5fa" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="500">01 · URL BUILDER</text>
-        <text x="94" y="88" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">Sector + date +</text>
-        <text x="94" y="102" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">currency → URL</text>
-
-        <!-- arrow 1→2 -->
-        <line x1="168" y1="80" x2="208" y2="80" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr)"/>
-
-        <!-- 2: Browser / Playwright -->
-        <rect x="210" y="44" width="148" height="72" rx="8" fill="#111827" stroke="#92400e" stroke-width="1"/>
-        <text x="284" y="70" text-anchor="middle" fill="#fbbf24" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="500">02 · PLAYWRIGHT</text>
-        <text x="284" y="88" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">Stealth browser,</text>
-        <text x="284" y="102" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">JSON hook, stall detect</text>
-
-        <!-- arrow 2→3 -->
-        <line x1="358" y1="80" x2="398" y2="80" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr)"/>
-
-        <!-- 3: Parse & Normalize -->
-        <rect x="400" y="44" width="148" height="72" rx="8" fill="#111827" stroke="#065f46" stroke-width="1"/>
-        <text x="474" y="70" text-anchor="middle" fill="#4ade80" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="500">03 · NORMALIZE</text>
-        <text x="474" y="88" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">Dedup · nonstop filter</text>
-        <text x="474" y="102" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">· cheapest per flight</text>
-
-        <!-- arrow 3→4 -->
-        <line x1="548" y1="80" x2="588" y2="80" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr)"/>
-
-        <!-- 4: Currency -->
-        <rect x="590" y="44" width="148" height="72" rx="8" fill="#111827" stroke="#4c1d95" stroke-width="1"/>
-        <text x="664" y="70" text-anchor="middle" fill="#a78bfa" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="500">04 · CURRENCY</text>
-        <text x="664" y="88" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">PKR / USD / AED</text>
-        <text x="664" y="102" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">SAR / GBP</text>
-
-        <!-- arrow 4→5 -->
-        <line x1="738" y1="80" x2="778" y2="80" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr)"/>
-
-        <!-- 5: Sheets Push -->
-        <rect x="780" y="44" width="160" height="72" rx="8" fill="#111827" stroke="#0e7490" stroke-width="1"/>
-        <text x="860" y="70" text-anchor="middle" fill="#2dd4bf" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="500">05 · SHEETS PUSH</text>
-        <text x="860" y="88" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">CONFIG map → cell</text>
-        <text x="860" y="102" text-anchor="middle" fill="#7a8499" font-family="'Inter',sans-serif" font-size="11">batch_update()</text>
-
-        <!-- Stage labels below -->
-        <text x="94"  y="138" text-anchor="middle" fill="#3d4a63" font-family="'JetBrains Mono',monospace" font-size="9">urllib.parse</text>
-        <text x="284" y="138" text-anchor="middle" fill="#3d4a63" font-family="'JetBrains Mono',monospace" font-size="9">playwright-stealth</text>
-        <text x="474" y="138" text-anchor="middle" fill="#3d4a63" font-family="'JetBrains Mono',monospace" font-size="9">pandas · regex</text>
-        <text x="664" y="138" text-anchor="middle" fill="#3d4a63" font-family="'JetBrains Mono',monospace" font-size="9">5 currencies · 40+ codes</text>
-        <text x="860" y="138" text-anchor="middle" fill="#3d4a63" font-family="'JetBrains Mono',monospace" font-size="9">gspread · Sheets API v4</text>
-      </svg>
+    <!-- Tableau -->
+    <div class="sol-tableau" id="solTable"></div>
+    <div class="sol-status">
+      <span>Double-click to send to foundation &nbsp;|&nbsp; Click deck to draw</span>
+      <span id="solMsg"></span>
+    </div>
+    <div class="sol-stat-bar">
+      <span>Score: <b id="solScore2">0</b></span>
+      <span>Moves: <b id="solMoves2">0</b></span>
+      <span>Time: <b id="solTime2">0:00</b></span>
     </div>
   </div>
+  <div class="resize-handle" id="resize-solitaire"></div>
+</div>
 
-  <!-- About strip -->
-<div class="about-strip">
-    <div class="about-card">
-      <h3>About this project</h3>
-      <p>The Fare Intelligence Suite is a sanitized architectural blueprint modeled after real automation tools I've designed. In competitive airline markets, manual fare tracking causes severe reporting lags. This project simulates an end-to-end extraction and sync loop—proving how web scraping, fault-tolerant programming, and API integration can stream live competitive market data directly to commercial dashboards and spreadsheet matrices without manual effort.</p>
-      <p style="margin-top:0.5rem;">All data and corporate targets in this public demonstration are strictly synthetic. The operational logic is real.</p>
-    </div>
-    <div class="about-card">
-      <h3>About me</h3>
-      <p>I am a Revenue Management Analyst at Air Blue with a strong background in Statistics (BS Statistics from Quaid-e-Azam University). I specialize in bridging the gap between core commercial operations and data automation. By developing custom web scrapers, data parsers, and interactive web tools, I eliminate repetitive manual reporting to help commercial teams track competitor fares, monitor load factors, and maximize flight route yields.</p>
-      <a href="https://github.com/HamzaSarfrazz" class="about-link" target="_blank">GitHub — HamzaSarfrazz ↗</a><br>
-      <a href="https://www.linkedin.com/in/hamza-sarfraz-b83221185" class="about-link" target="_blank">LinkedIn ↗</a>
-      <a href="mailto:hamzasarfraz.aah@gmail.com" class="about-link">hamzasarfraz.aah@gmail.com ↗</a>
-    </div>
+
+<!-- SKYSYNC PRO -->
+<div class="win" id="win-skysync" style="left:60px;top:30px;width:880px;height:580px;">
+  <div class="win-title" id="title-skysync">
+    <div class="win-title-text"><span>✈️</span> SkySync Pro — Fare Intelligence Suite</div>
+    <div class="win-controls"><button class="win-btn" onclick="minWin('skysync')">_</button><button class="win-btn" onclick="maxWin('skysync')">□</button><button class="win-btn" onclick="closeWin('skysync')">x</button></div>
   </div>
+  <div class="win-menubar"><span class="win-menu-item">File</span><span class="win-menu-item">View</span><span class="win-menu-item">Help</span></div>
+  <div class="win-body" style="padding:0;overflow:hidden;">
+    <iframe id="skysync-frame" style="width:100%;height:100%;border:none;display:block;"></iframe>
+  </div>
+  <div class="win-statusbar"><div class="statusbar-pane">✈️ SkySync Pro · Fare Intelligence Suite · Python · Playwright · Streamlit · gspread</div></div>
+  <div class="resize-handle" id="resize-skysync"></div>
+</div>
 
-</main>
+<!-- TASKBAR -->
+<div class="taskbar">
+  <button class="start-btn" onclick="toggleStart()" id="startBtn"><span>🪟</span> <b>Start</b></button>
+  <div class="taskbar-sep"></div>
+  <div id="taskbar-btns" style="display:flex;gap:2px;"></div>
+  <div class="taskbar-spacer"></div>
+  <div class="clock" id="clock">12:00 PM</div>
+</div>
 
-<footer>
-  Built by <a href="https://github.com/HamzaSarfrazz" target="_blank">Hamza Sarfraz</a> · Revenue Management Analytics Portfolio &nbsp;·&nbsp; <a href="https://github.com/HamzaSarfrazz/International-Fare-Comparison" target="_blank">View Source on GitHub ↗</a>
-</footer>
+<!-- START MENU -->
+<div class="start-menu" id="startMenu">
+  <div class="start-menu-sidebar"><span>Windows 98</span></div>
+  <div class="start-menu-items">
+    <div class="start-item" onclick="openWin('about');toggleStart()"><span class="start-item-icon">🖥️</span><span>About Hamza</span></div>
+    <div class="start-item" onclick="openWin('projects');toggleStart()"><span class="start-item-icon">📁</span><span>Projects</span></div>
+    <div class="start-item" onclick="openWin('skills');toggleStart()"><span class="start-item-icon">⚙️</span><span>Skills.exe</span></div>
+    <div class="start-item" onclick="openWin('cv');toggleStart()"><span class="start-item-icon">📄</span><span>Resume.doc</span></div>
+    <div class="start-item" onclick="openWin('contact');toggleStart()"><span class="start-item-icon">✉️</span><span>Contact</span></div>
+    <div class="start-item" onclick="openWin('ie');toggleStart()"><span class="start-item-icon">🌐</span><span>Internet Explorer</span></div>
+    <div class="start-item" onclick="openWin('skysync');toggleStart()"><span class="start-item-icon">✈️</span><span>SkySync Pro</span></div>
+    <div class="start-divider"></div>
+    <div class="start-item" onclick="openWin('solitaire');toggleStart()"><span class="start-item-icon">🃏</span><span>Solitaire</span></div>
+    <div class="start-divider"></div>
+    <div class="start-item" onclick="showMsg('Run dialog: Type a program name to open it.')"><span class="start-item-icon">▶️</span><span>Run...</span></div>
+    <div class="start-divider"></div>
+    <div class="start-item" onclick="showMsg('It is now safe to turn off your computer.')"><span class="start-item-icon">⏻</span><span>Shut Down...</span></div>
+  </div>
+</div>
+
+<!-- DIALOG -->
+<div class="dialog-overlay" id="dlgOverlay">
+  <div class="dialog" id="dlgBox" style="left:50%;top:40%;transform:translate(-50%,-50%);">
+    <div class="dialog-title"><span class="dialog-title-text">Windows 98</span><button class="win-btn" onclick="closeDialog()">x</button></div>
+    <div class="dialog-body"><div class="dialog-icon" id="dlgIcon">⚠️</div><div class="dialog-text" id="dlgText"></div></div>
+    <div class="dialog-footer"><button class="w-btn" onclick="closeDialog()" style="border:2px solid #000;outline:1px solid #c0c0c0;">OK</button></div>
+  </div>
+</div>
 
 <script>
-/* ── Data ── */
-const FARES = [
-  {route:"KHI → DXB", region:"UAE", airline:"PA", dep:"07:30 AM", pkr:54200,  usd:194,  aed:713,  sar:728,  gbp:153, stops:0, tag:"best"},
-  {route:"KHI → DXB", region:"UAE", airline:"PK", dep:"09:15 AM", pkr:58900,  usd:211,  aed:774,  sar:791,  gbp:166, stops:0, tag:"direct"},
-  {route:"LHE → DXB", region:"UAE", airline:"PA", dep:"11:00 AM", pkr:61400,  usd:220,  aed:807,  sar:824,  gbp:173, stops:0, tag:"direct"},
-  {route:"ISB → DXB", region:"UAE", airline:"ER", dep:"02:45 PM", pkr:67800,  usd:243,  aed:891,  sar:910,  gbp:191, stops:1, tag:""},
-  {route:"KHI → AUH", region:"UAE", airline:"Q8", dep:"06:20 AM", pkr:72300,  usd:259,  aed:950,  sar:970,  gbp:204, stops:1, tag:""},
-  {route:"KHI → JED", region:"KSA", airline:"PA", dep:"03:30 AM", pkr:83100,  usd:298,  aed:1092, sar:1115, gbp:234, stops:0, tag:"best"},
-  {route:"LHE → RUH", region:"KSA", airline:"PK", dep:"05:15 AM", pkr:88400,  usd:317,  aed:1161, sar:1186, gbp:249, stops:0, tag:"direct"},
-  {route:"ISB → JED", region:"KSA", airline:"ER", dep:"10:45 PM", pkr:91700,  usd:329,  aed:1204, sar:1230, gbp:258, stops:1, tag:""},
-  {route:"KHI → MED", region:"KSA", airline:"Q8", dep:"01:00 AM", pkr:96200,  usd:345,  aed:1264, sar:1291, gbp:271, stops:1, tag:""},
-  {route:"KHI → LHR", region:"UK",  airline:"PK", dep:"08:00 PM", pkr:142000, usd:509,  aed:1866, sar:1907, gbp:401, stops:0, tag:"best"},
-  {route:"LHE → LHR", region:"UK",  airline:"PA", dep:"10:30 PM", pkr:154000, usd:552,  aed:2024, sar:2067, gbp:434, stops:1, tag:""},
-  {route:"ISB → MAN", region:"UK",  airline:"PK", dep:"11:59 PM", pkr:138500, usd:497,  aed:1820, sar:1859, gbp:391, stops:0, tag:"direct"},
-];
-const AIRLINES = {PA:"Air Blue", PK:"PIA", ER:"Kam Air", Q8:"Kuwait Airw."};
-const DOT_CLASS = {PA:"dot-pa", PK:"dot-pk", ER:"dot-er", Q8:"dot-q8"};
-const SYM = {PKR:"PKR ", USD:"$", AED:"AED ", SAR:"SAR ", GBP:"£"};
-let cur = "PKR";
 
-function getPrice(f){ return f[cur.toLowerCase()]; }
-function fmt(f){ return SYM[cur] + getPrice(f).toLocaleString(); }
-function priceClass(f){
-  const all = FARES.map(getPrice), mn = Math.min(...all), mx = Math.max(...all);
-  const p = getPrice(f), pct = (p-mn)/(mx-mn);
-  return pct < 0.33 ? "price-lo" : pct < 0.66 ? "price-mid" : "price-hi";
-}
-function barW(f){
-  const all = FARES.map(getPrice), mn = Math.min(...all), mx = Math.max(...all);
-  return Math.round(((getPrice(f)-mn)/(mx-mn))*70+8);
+// SkySync loader — base64 encoded to avoid any JS string escaping issues
+const _SKYSYNC_B64 = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgo8dGl0bGU+RmFyZSBJbnRlbGxpZ2VuY2UgU3VpdGUgwrcgSGFtemEgU2FyZnJhejwvdGl0bGU+CjxtZXRhIG5hbWU9ImRlc2NyaXB0aW9uIiBjb250ZW50PSJJbnRlcmFjdGl2ZSBwb3J0Zm9saW8gZGVtbyDigJQgYXV0b21hdGVkIGludGVybmF0aW9uYWwgZmxpZ2h0IGZhcmUgc2NyYXBpbmcsIG11bHRpLWN1cnJlbmN5IGNvbXBhcmlzb24sIGFuZCBHb29nbGUgU2hlZXRzIHN5bmMgcGlwZWxpbmUgYnkgSGFtemEgU2FyZnJhei4iPgo8bGluayByZWw9InByZWNvbm5lY3QiIGhyZWY9Imh0dHBzOi8vZm9udHMuZ29vZ2xlYXBpcy5jb20iPgo8bGluayByZWw9InByZWNvbm5lY3QiIGhyZWY9Imh0dHBzOi8vZm9udHMuZ3N0YXRpYy5jb20iIGNyb3Nzb3JpZ2luPgo8bGluayBocmVmPSJodHRwczovL2ZvbnRzLmdvb2dsZWFwaXMuY29tL2NzczI/ZmFtaWx5PUludGVyOndnaHRANDAwOzUwMDs2MDAmZmFtaWx5PUpldEJyYWlucytNb25vOndnaHRANDAwOzUwMCZmYW1pbHk9U3luZTp3Z2h0QDcwMDs4MDAmZGlzcGxheT1zd2FwIiByZWw9InN0eWxlc2hlZXQiPgo8c3R5bGU+Ci8qIOKUgOKUgCBSZXNldCAmIHRva2VucyDilIDilIAgKi8KKiwgKjo6YmVmb3JlLCAqOjphZnRlciB7IGJveC1zaXppbmc6IGJvcmRlci1ib3g7IG1hcmdpbjogMDsgcGFkZGluZzogMDsgfQoKOnJvb3QgewogIC0tYmc6ICAgICAgICMwYjBmMWE7CiAgLS1iZzI6ICAgICAgIzExMTgyNzsKICAtLWJnMzogICAgICAjMWEyMjM1OwogIC0tYm9yZGVyOiAgIHJnYmEoMjU1LDI1NSwyNTUsMC4wOCk7CiAgLS1ib3JkZXIyOiAgcmdiYSgyNTUsMjU1LDI1NSwwLjE0KTsKICAtLXRleHQ6ICAgICAjZThlY2Y0OwogIC0tbXV0ZWQ6ICAgICM3YTg0OTk7CiAgLS1zdWJ0bGU6ICAgIzNkNGE2MzsKICAtLWFjY2VudDogICAjM2I4MmY2OwogIC0tYWNjZW50MjogICM2MGE1ZmE7CiAgLS1ncmVlbjogICAgIzIyYzU1ZTsKICAtLWFtYmVyOiAgICAjZjU5ZTBiOwogIC0tcmVkOiAgICAgICNlZjQ0NDQ7CiAgLS1ncmVlbi1iZzogcmdiYSgzNCwxOTcsOTQsMC4xKTsKICAtLWFtYmVyLWJnOiByZ2JhKDI0NSwxNTgsMTEsMC4xKTsKICAtLXJlZC1iZzogICByZ2JhKDIzOSw2OCw2OCwwLjEpOwogIC0tbW9ubzogICAgICdKZXRCcmFpbnMgTW9ubycsIG1vbm9zcGFjZTsKICAtLWRpc3BsYXk6ICAnU3luZScsIHNhbnMtc2VyaWY7CiAgLS1ib2R5OiAgICAgJ0ludGVyJywgc2Fucy1zZXJpZjsKfQoKaHRtbCB7IHNjcm9sbC1iZWhhdmlvcjogc21vb3RoOyB9CmJvZHkgeyBiYWNrZ3JvdW5kOiB2YXIoLS1iZyk7IGNvbG9yOiB2YXIoLS10ZXh0KTsgZm9udC1mYW1pbHk6IHZhcigtLWJvZHkpOyBmb250LXNpemU6IDE1cHg7IGxpbmUtaGVpZ2h0OiAxLjY7IG1pbi1oZWlnaHQ6IDEwMHZoOyB9CgovKiDilIDilIAgSGVybyDilIDilIAgKi8KLmhlcm8gewogIHBhZGRpbmc6IDVyZW0gMnJlbSA0cmVtOwogIHRleHQtYWxpZ246IGNlbnRlcjsKICBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsKICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgb3ZlcmZsb3c6IGhpZGRlbjsKfQouaGVybzo6YmVmb3JlIHsKICBjb250ZW50OiAnJzsKICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgaW5zZXQ6IDA7CiAgYmFja2dyb3VuZDogcmFkaWFsLWdyYWRpZW50KGVsbGlwc2UgNjAlIDUwJSBhdCA1MCUgMCUsIHJnYmEoNTksMTMwLDI0NiwwLjEyKSwgdHJhbnNwYXJlbnQgNzAlKTsKICBwb2ludGVyLWV2ZW50czogbm9uZTsKfQouaGVyby1leWVicm93IHsKICBmb250LWZhbWlseTogdmFyKC0tbW9ubyk7CiAgZm9udC1zaXplOiAxMXB4OwogIGxldHRlci1zcGFjaW5nOiAwLjJlbTsKICB0ZXh0LXRyYW5zZm9ybTogdXBwZXJjYXNlOwogIGNvbG9yOiB2YXIoLS1hY2NlbnQyKTsKICBtYXJnaW4tYm90dG9tOiAxLjI1cmVtOwogIGRpc3BsYXk6IGZsZXg7CiAgYWxpZ24taXRlbXM6IGNlbnRlcjsKICBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsKICBnYXA6IDhweDsKfQouaGVyby1leWVicm93OjpiZWZvcmUsIC5oZXJvLWV5ZWJyb3c6OmFmdGVyIHsgY29udGVudDogJyc7IHdpZHRoOiAzMnB4OyBoZWlnaHQ6IDFweDsgYmFja2dyb3VuZDogdmFyKC0tYWNjZW50Mik7IG9wYWNpdHk6IDAuNDsgfQouaGVybyBoMSB7CiAgZm9udC1mYW1pbHk6IHZhcigtLWRpc3BsYXkpOwogIGZvbnQtc2l6ZTogY2xhbXAoMi40cmVtLCA2dncsIDQuMnJlbSk7CiAgZm9udC13ZWlnaHQ6IDgwMDsKICBsaW5lLWhlaWdodDogMS4wNTsKICBsZXR0ZXItc3BhY2luZzogLTAuMDJlbTsKICBjb2xvcjogI2ZmZjsKICBtYXJnaW4tYm90dG9tOiAxcmVtOwp9Ci5oZXJvIGgxIHNwYW4geyBjb2xvcjogdmFyKC0tYWNjZW50Mik7IH0KLmhlcm8tc3ViIHsKICBmb250LXNpemU6IDEuMDVyZW07CiAgY29sb3I6IHZhcigtLW11dGVkKTsKICBtYXgtd2lkdGg6IDUyMHB4OwogIG1hcmdpbjogMCBhdXRvIDJyZW07CiAgbGluZS1oZWlnaHQ6IDEuNjU7Cn0KLmhlcm8tcGlsbHMgeyBkaXNwbGF5OiBmbGV4OyBmbGV4LXdyYXA6IHdyYXA7IGdhcDogOHB4OyBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsgbWFyZ2luLWJvdHRvbTogMi41cmVtOyB9Ci5waWxsIHsKICBmb250LWZhbWlseTogdmFyKC0tbW9ubyk7CiAgZm9udC1zaXplOiAxMXB4OwogIHBhZGRpbmc6IDRweCAxMnB4OwogIGJvcmRlci1yYWRpdXM6IDIwcHg7CiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyMik7CiAgY29sb3I6IHZhcigtLW11dGVkKTsKICBiYWNrZ3JvdW5kOiB2YXIoLS1iZzIpOwp9Ci5oZXJvLWxpbmtzIHsgZGlzcGxheTogZmxleDsgZ2FwOiAxMnB4OyBqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjsgZmxleC13cmFwOiB3cmFwOyB9Ci5idG4gewogIGRpc3BsYXk6IGlubGluZS1mbGV4OwogIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAgZ2FwOiA2cHg7CiAgcGFkZGluZzogMC42cmVtIDEuM3JlbTsKICBib3JkZXItcmFkaXVzOiA4cHg7CiAgZm9udC1zaXplOiAxNHB4OwogIGZvbnQtd2VpZ2h0OiA1MDA7CiAgdGV4dC1kZWNvcmF0aW9uOiBub25lOwogIHRyYW5zaXRpb246IGFsbCAwLjE1czsKICBjdXJzb3I6IHBvaW50ZXI7CiAgYm9yZGVyOiBub25lOwp9Ci5idG4tcHJpbWFyeSB7IGJhY2tncm91bmQ6IHZhcigtLWFjY2VudCk7IGNvbG9yOiAjZmZmOyB9Ci5idG4tcHJpbWFyeTpob3ZlciB7IGJhY2tncm91bmQ6ICMyNTYzZWI7IH0KLmJ0bi1naG9zdCB7IGJhY2tncm91bmQ6IHRyYW5zcGFyZW50OyBjb2xvcjogdmFyKC0tdGV4dCk7IGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpOyB9Ci5idG4tZ2hvc3Q6aG92ZXIgeyBiYWNrZ3JvdW5kOiB2YXIoLS1iZzMpOyBib3JkZXItY29sb3I6IHZhcigtLWJvcmRlcjIpOyB9CgovKiDilIDilIAgTWFpbiBsYXlvdXQg4pSA4pSAICovCi5tYWluIHsgbWF4LXdpZHRoOiAxMTAwcHg7IG1hcmdpbjogMCBhdXRvOyBwYWRkaW5nOiAzcmVtIDEuNXJlbSA1cmVtOyB9CgovKiDilIDilIAgU2VjdGlvbiBoZWFkZXJzIOKUgOKUgCAqLwouc2VjdGlvbi10aXRsZSB7CiAgZm9udC1mYW1pbHk6IHZhcigtLW1vbm8pOwogIGZvbnQtc2l6ZTogMTBweDsKICBsZXR0ZXItc3BhY2luZzogMC4yZW07CiAgdGV4dC10cmFuc2Zvcm06IHVwcGVyY2FzZTsKICBjb2xvcjogdmFyKC0tYWNjZW50Mik7CiAgbWFyZ2luLWJvdHRvbTogMC41cmVtOwp9Ci5zZWN0aW9uLWhlYWRpbmcgewogIGZvbnQtZmFtaWx5OiB2YXIoLS1kaXNwbGF5KTsKICBmb250LXNpemU6IDEuNnJlbTsKICBmb250LXdlaWdodDogNzAwOwogIGNvbG9yOiAjZmZmOwogIG1hcmdpbi1ib3R0b206IDAuNXJlbTsKfQouc2VjdGlvbi1kZXNjIHsgY29sb3I6IHZhcigtLW11dGVkKTsgZm9udC1zaXplOiAxNHB4OyBtYXJnaW4tYm90dG9tOiAycmVtOyBtYXgtd2lkdGg6IDU2MHB4OyB9CgovKiDilIDilIAgQ2FyZCDilIDilIAgKi8KLmNhcmQgewogIGJhY2tncm91bmQ6IHZhcigtLWJnMik7CiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsKICBib3JkZXItcmFkaXVzOiAxMnB4OwogIG92ZXJmbG93OiBoaWRkZW47Cn0KLmNhcmQtaGVhZGVyIHsKICBkaXNwbGF5OiBmbGV4OwogIGFsaWduLWl0ZW1zOiBjZW50ZXI7CiAganVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuOwogIHBhZGRpbmc6IDFyZW0gMS4yNXJlbTsKICBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsKICBiYWNrZ3JvdW5kOiB2YXIoLS1iZzMpOwp9Ci5jYXJkLXRpdGxlIHsgZm9udC1zaXplOiAxM3B4OyBmb250LXdlaWdodDogNTAwOyBjb2xvcjogdmFyKC0tdGV4dCk7IH0KLmNhcmQtYm9keSB7IHBhZGRpbmc6IDEuMjVyZW07IH0KCi8qIOKUgOKUgCBUYWJzIOKUgOKUgCAqLwoudGFicyB7IGRpc3BsYXk6IGZsZXg7IGJvcmRlci1ib3R0b206IDFweCBzb2xpZCB2YXIoLS1ib3JkZXIpOyBiYWNrZ3JvdW5kOiB2YXIoLS1iZzMpOyB9Ci50YWIgeyBwYWRkaW5nOiAwLjdyZW0gMS4xcmVtOyBmb250LXNpemU6IDEzcHg7IGNvbG9yOiB2YXIoLS1tdXRlZCk7IGN1cnNvcjogcG9pbnRlcjsgYm9yZGVyLWJvdHRvbTogMnB4IHNvbGlkIHRyYW5zcGFyZW50OyB0cmFuc2l0aW9uOiBjb2xvciAwLjE1czsgd2hpdGUtc3BhY2U6IG5vd3JhcDsgYmFja2dyb3VuZDogbm9uZTsgYm9yZGVyLXRvcDogbm9uZTsgYm9yZGVyLWxlZnQ6IG5vbmU7IGJvcmRlci1yaWdodDogbm9uZTsgZm9udC1mYW1pbHk6IHZhcigtLWJvZHkpOyB9Ci50YWI6aG92ZXIgeyBjb2xvcjogdmFyKC0tdGV4dCk7IH0KLnRhYi5hY3RpdmUgeyBjb2xvcjogdmFyKC0tYWNjZW50Mik7IGJvcmRlci1ib3R0b20tY29sb3I6IHZhcigtLWFjY2VudDIpOyBmb250LXdlaWdodDogNTAwOyB9CgoucGFuZWwgeyBkaXNwbGF5OiBub25lOyBwYWRkaW5nOiAxLjI1cmVtOyB9Ci5wYW5lbC5hY3RpdmUgeyBkaXNwbGF5OiBibG9jazsgfQoKLyog4pSA4pSAIEtQSSByb3cg4pSA4pSAICovCi5rcGktcm93IHsgZGlzcGxheTogZ3JpZDsgZ3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiByZXBlYXQoNCwgMWZyKTsgZ2FwOiAxMHB4OyBtYXJnaW4tYm90dG9tOiAxLjI1cmVtOyB9Ci5rcGkgeyBiYWNrZ3JvdW5kOiB2YXIoLS1iZzMpOyBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1ib3JkZXIpOyBib3JkZXItcmFkaXVzOiA4cHg7IHBhZGRpbmc6IDAuODVyZW0gMXJlbTsgfQoua3BpLWxhYmVsIHsgZm9udC1zaXplOiAxMHB4OyBmb250LWZhbWlseTogdmFyKC0tbW9ubyk7IGxldHRlci1zcGFjaW5nOiAwLjFlbTsgdGV4dC10cmFuc2Zvcm06IHVwcGVyY2FzZTsgY29sb3I6IHZhcigtLW11dGVkKTsgbWFyZ2luLWJvdHRvbTogNXB4OyB9Ci5rcGktdmFsIHsgZm9udC1zaXplOiAxLjM1cmVtOyBmb250LXdlaWdodDogNjAwOyBjb2xvcjogI2ZmZjsgfQoua3BpLXN1YiB7IGZvbnQtc2l6ZTogMTFweDsgY29sb3I6IHZhcigtLW11dGVkKTsgbWFyZ2luLXRvcDogMnB4OyB9Ci5rcGktdmFsLmdyZWVuIHsgY29sb3I6IHZhcigtLWdyZWVuKTsgfQoua3BpLXZhbC5hbWJlciB7IGNvbG9yOiB2YXIoLS1hbWJlcik7IH0KCi8qIOKUgOKUgCBGaWx0ZXJzIOKUgOKUgCAqLwouZmlsdGVyLXJvdyB7IGRpc3BsYXk6IGZsZXg7IGdhcDogOHB4OyBtYXJnaW4tYm90dG9tOiAxcmVtOyBmbGV4LXdyYXA6IHdyYXA7IGFsaWduLWl0ZW1zOiBjZW50ZXI7IH0KLnNlbGVjdC13cmFwIHsgcG9zaXRpb246IHJlbGF0aXZlOyB9CnNlbGVjdCB7CiAgYXBwZWFyYW5jZTogbm9uZTsKICBiYWNrZ3JvdW5kOiB2YXIoLS1iZzMpOwogIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpOwogIGJvcmRlci1yYWRpdXM6IDZweDsKICBjb2xvcjogdmFyKC0tdGV4dCk7CiAgZm9udC1zaXplOiAxMnB4OwogIGZvbnQtZmFtaWx5OiB2YXIoLS1ib2R5KTsKICBwYWRkaW5nOiAwLjM1cmVtIDEuNnJlbSAwLjM1cmVtIDAuN3JlbTsKICBjdXJzb3I6IHBvaW50ZXI7Cn0KLnNlbGVjdC13cmFwOjphZnRlciB7IGNvbnRlbnQ6ICfilr4nOyBwb3NpdGlvbjogYWJzb2x1dGU7IHJpZ2h0OiA4cHg7IHRvcDogNTAlOyB0cmFuc2Zvcm06IHRyYW5zbGF0ZVkoLTUwJSk7IGNvbG9yOiB2YXIoLS1tdXRlZCk7IGZvbnQtc2l6ZTogMTBweDsgcG9pbnRlci1ldmVudHM6IG5vbmU7IH0KLnNwYWNlciB7IGZsZXg6IDE7IH0KCi8qIOKUgOKUgCBDdXJyZW5jeSBwaWxscyDilIDilIAgKi8KLmN4LXJvdyB7IGRpc3BsYXk6IGZsZXg7IGdhcDogNXB4OyBmbGV4LXdyYXA6IHdyYXA7IH0KLmN4LWJ0biB7CiAgZm9udC1mYW1pbHk6IHZhcigtLW1vbm8pOwogIGZvbnQtc2l6ZTogMTFweDsKICBwYWRkaW5nOiAzcHggMTBweDsKICBib3JkZXItcmFkaXVzOiAyMHB4OwogIGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWJvcmRlcjIpOwogIGNvbG9yOiB2YXIoLS1tdXRlZCk7CiAgYmFja2dyb3VuZDogdHJhbnNwYXJlbnQ7CiAgY3Vyc29yOiBwb2ludGVyOwogIHRyYW5zaXRpb246IGFsbCAwLjEyczsKfQouY3gtYnRuLmFjdGl2ZSB7IGJhY2tncm91bmQ6IHJnYmEoNTksMTMwLDI0NiwwLjE1KTsgY29sb3I6IHZhcigtLWFjY2VudDIpOyBib3JkZXItY29sb3I6IHZhcigtLWFjY2VudCk7IH0KLmN4LWJ0bjpob3Zlcjpub3QoLmFjdGl2ZSkgeyBiYWNrZ3JvdW5kOiB2YXIoLS1iZzMpOyBjb2xvcjogdmFyKC0tdGV4dCk7IH0KCi8qIOKUgOKUgCBGYXJlIHRhYmxlIOKUgOKUgCAqLwouZmFyZS10YWJsZSB7IHdpZHRoOiAxMDAlOyBib3JkZXItY29sbGFwc2U6IGNvbGxhcHNlOyBmb250LXNpemU6IDEzcHg7IH0KLmZhcmUtdGFibGUgdGggeyB0ZXh0LWFsaWduOiBsZWZ0OyBmb250LXNpemU6IDEwcHg7IGZvbnQtZmFtaWx5OiB2YXIoLS1tb25vKTsgbGV0dGVyLXNwYWNpbmc6IDAuMWVtOyB0ZXh0LXRyYW5zZm9ybTogdXBwZXJjYXNlOyBjb2xvcjogdmFyKC0tbXV0ZWQpOyBwYWRkaW5nOiAwIDAuNzVyZW0gMC42cmVtOyBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsgfQouZmFyZS10YWJsZSB0ZCB7IHBhZGRpbmc6IDAuNnJlbSAwLjc1cmVtOyBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsgY29sb3I6IHZhcigtLXRleHQpOyB2ZXJ0aWNhbC1hbGlnbjogbWlkZGxlOyB9Ci5mYXJlLXRhYmxlIHRyOmxhc3QtY2hpbGQgdGQgeyBib3JkZXItYm90dG9tOiBub25lOyB9Ci5mYXJlLXRhYmxlIHRib2R5IHRyOmhvdmVyIHRkIHsgYmFja2dyb3VuZDogdmFyKC0tYmczKTsgfQoKLmRvdCB7IGRpc3BsYXk6IGlubGluZS1ibG9jazsgd2lkdGg6IDdweDsgaGVpZ2h0OiA3cHg7IGJvcmRlci1yYWRpdXM6IDUwJTsgbWFyZ2luLXJpZ2h0OiA1cHg7IH0KLmRvdC1wYSB7IGJhY2tncm91bmQ6ICMzYjgyZjY7IH0KLmRvdC1wayB7IGJhY2tncm91bmQ6ICMyMmM1NWU7IH0KLmRvdC1lciB7IGJhY2tncm91bmQ6ICNmNTllMGI7IH0KLmRvdC1xOCB7IGJhY2tncm91bmQ6ICNhNzhiZmE7IH0KCi5wcmljZS13cmFwIHsgZGlzcGxheTogZmxleDsgYWxpZ24taXRlbXM6IGNlbnRlcjsgZ2FwOiA3cHg7IH0KLnByaWNlLWJhciB7IGhlaWdodDogNHB4OyBib3JkZXItcmFkaXVzOiAycHg7IGJhY2tncm91bmQ6IHZhcigtLWFjY2VudCk7IG9wYWNpdHk6IDAuNTsgfQoucHJpY2UtbG8geyBjb2xvcjogdmFyKC0tZ3JlZW4pOyBmb250LXdlaWdodDogNTAwOyB9Ci5wcmljZS1taWQgeyBjb2xvcjogdmFyKC0tYW1iZXIpOyBmb250LXdlaWdodDogNTAwOyB9Ci5wcmljZS1oaSB7IGNvbG9yOiB2YXIoLS1yZWQpOyBmb250LXdlaWdodDogNTAwOyB9CgoudGFnIHsgZGlzcGxheTogaW5saW5lLWJsb2NrOyBmb250LXNpemU6IDEwcHg7IHBhZGRpbmc6IDJweCA3cHg7IGJvcmRlci1yYWRpdXM6IDIwcHg7IGZvbnQtZmFtaWx5OiB2YXIoLS1tb25vKTsgfQoudGFnLWJlc3QgeyBiYWNrZ3JvdW5kOiB2YXIoLS1ncmVlbi1iZyk7IGNvbG9yOiB2YXIoLS1ncmVlbik7IH0KLnRhZy1kaXJlY3QgeyBiYWNrZ3JvdW5kOiByZ2JhKDU5LDEzMCwyNDYsMC4xMik7IGNvbG9yOiB2YXIoLS1hY2NlbnQyKTsgfQoKLyog4pSA4pSAIE1hdHJpeCDilIDilIAgKi8KLm1hdHJpeC13cmFwIHsgb3ZlcmZsb3cteDogYXV0bzsgfQoubWF0cml4LXRhYmxlIHsgd2lkdGg6IDEwMCU7IGJvcmRlci1jb2xsYXBzZTogY29sbGFwc2U7IGZvbnQtc2l6ZTogMTJweDsgfQoubWF0cml4LXRhYmxlIHRoIHsgZm9udC1zaXplOiAxMHB4OyBmb250LWZhbWlseTogdmFyKC0tbW9ubyk7IGNvbG9yOiB2YXIoLS1tdXRlZCk7IHBhZGRpbmc6IDAuNHJlbSAwLjVyZW07IGJvcmRlcjogMXB4IHNvbGlkIHZhcigtLWJvcmRlcik7IGJhY2tncm91bmQ6IHZhcigtLWJnMyk7IHRleHQtYWxpZ246IGNlbnRlcjsgd2hpdGUtc3BhY2U6IG5vd3JhcDsgfQoubWF0cml4LXRhYmxlIHRkIHsgcGFkZGluZzogMC40cmVtIDAuNXJlbTsgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsgdGV4dC1hbGlnbjogY2VudGVyOyBmb250LWZhbWlseTogdmFyKC0tbW9ubyk7IGZvbnQtc2l6ZTogMTFweDsgd2hpdGUtc3BhY2U6IG5vd3JhcDsgfQoubWF0cml4LXRhYmxlIHRkLnJvdXRlLWxhYmVsIHsgdGV4dC1hbGlnbjogbGVmdDsgZm9udC1mYW1pbHk6IHZhcigtLWJvZHkpOyBmb250LXdlaWdodDogNTAwOyBjb2xvcjogdmFyKC0tdGV4dCk7IGJhY2tncm91bmQ6IHZhcigtLWJnMyk7IHdoaXRlLXNwYWNlOiBub3dyYXA7IH0KLmNlbGwtbG8gIHsgYmFja2dyb3VuZDogcmdiYSgzNCwxOTcsOTQsMC4xMik7ICBjb2xvcjogIzRhZGU4MDsgfQouY2VsbC1taWQgeyBiYWNrZ3JvdW5kOiByZ2JhKDI0NSwxNTgsMTEsMC4xMik7IGNvbG9yOiAjZmJiZjI0OyB9Ci5jZWxsLWhpICB7IGJhY2tncm91bmQ6IHJnYmEoMjM5LDY4LDY4LDAuMTIpOyAgY29sb3I6ICNmODcxNzE7IH0KCi8qIOKUgOKUgCBTY3JhcGVyIHNpbSDilIDilIAgKi8KLnNjcmFwZXItZ3JpZCB7IGRpc3BsYXk6IGZsZXg7IGZsZXgtZGlyZWN0aW9uOiBjb2x1bW47IGdhcDogMDsgYmFja2dyb3VuZDogdmFyKC0tYmczKTsgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsgYm9yZGVyLXJhZGl1czogOHB4OyBvdmVyZmxvdzogaGlkZGVuOyBtYXJnaW4tYm90dG9tOiAxcmVtOyB9Ci5zaW0tcm93IHsgZGlzcGxheTogZmxleDsgYWxpZ24taXRlbXM6IGNlbnRlcjsgZ2FwOiA4cHg7IHBhZGRpbmc6IDAuNXJlbSAwLjc1cmVtOyBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsgZm9udC1zaXplOiAxMnB4OyB9Ci5zaW0tcm93Omxhc3QtY2hpbGQgeyBib3JkZXItYm90dG9tOiBub25lOyB9Ci5zaW0tc2VjdG9yIHsgZm9udC1mYW1pbHk6IHZhcigtLW1vbm8pOyBmbGV4OiAxOyBjb2xvcjogdmFyKC0tdGV4dCk7IH0KLnNpbS1wcmljZSB7IGZvbnQtZmFtaWx5OiB2YXIoLS1tb25vKTsgZm9udC1zaXplOiAxMXB4OyBjb2xvcjogdmFyKC0tbXV0ZWQpOyB9Ci5zaW0tYmFkZ2UgeyBmb250LXNpemU6IDEwcHg7IGZvbnQtZmFtaWx5OiB2YXIoLS1tb25vKTsgcGFkZGluZzogMnB4IDhweDsgYm9yZGVyLXJhZGl1czogMjBweDsgZm9udC13ZWlnaHQ6IDUwMDsgd2hpdGUtc3BhY2U6IG5vd3JhcDsgfQouYmFkZ2Utd2FpdCAgeyBiYWNrZ3JvdW5kOiB2YXIoLS1iZyk7ICAgY29sb3I6IHZhcigtLXN1YnRsZSk7ICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1ib3JkZXIpOyB9Ci5iYWRnZS1ydW4gICB7IGJhY2tncm91bmQ6IHJnYmEoMjQ1LDE1OCwxMSwwLjEyKTsgY29sb3I6IHZhcigtLWFtYmVyKTsgfQouYmFkZ2UtZG9uZSAgeyBiYWNrZ3JvdW5kOiB2YXIoLS1ncmVlbi1iZyk7IGNvbG9yOiB2YXIoLS1ncmVlbik7IH0KCi8qIOKUgOKUgCBMb2cgdGVybWluYWwg4pSA4pSAICovCi5sb2ctdGVybWluYWwgewogIGJhY2tncm91bmQ6ICMwNjBhMTA7CiAgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsKICBib3JkZXItcmFkaXVzOiA4cHg7CiAgcGFkZGluZzogMC44NXJlbSAxcmVtOwogIGZvbnQtZmFtaWx5OiB2YXIoLS1tb25vKTsKICBmb250LXNpemU6IDExcHg7CiAgbGluZS1oZWlnaHQ6IDEuNzU7CiAgY29sb3I6ICM0YWRlODA7CiAgbWF4LWhlaWdodDogMjIwcHg7CiAgb3ZlcmZsb3cteTogYXV0bzsKfQoubG9nLXRlcm1pbmFsOjotd2Via2l0LXNjcm9sbGJhciB7IHdpZHRoOiA0cHg7IH0KLmxvZy10ZXJtaW5hbDo6LXdlYmtpdC1zY3JvbGxiYXItdGh1bWIgeyBiYWNrZ3JvdW5kOiB2YXIoLS1zdWJ0bGUpOyBib3JkZXItcmFkaXVzOiAycHg7IH0KLmxvZy1nIHsgY29sb3I6IHZhcigtLW11dGVkKTsgfQoubG9nLWIgeyBjb2xvcjogdmFyKC0tYWNjZW50Mik7IH0KLmxvZy15IHsgY29sb3I6ICNmYmJmMjQ7IH0KLmxvZy13IHsgY29sb3I6ICNlOGVjZjQ7IH0KLmxvZy1yIHsgY29sb3I6ICNmODcxNzE7IH0KCi8qIOKUgOKUgCBBcmNoaXRlY3R1cmUg4pSA4pSAICovCi5hcmNoLWxpc3QgeyBkaXNwbGF5OiBmbGV4OyBmbGV4LWRpcmVjdGlvbjogY29sdW1uOyBnYXA6IDA7IH0KLmFyY2gtaXRlbSB7CiAgZGlzcGxheTogZmxleDsgZ2FwOiAxcmVtOyBwYWRkaW5nOiAxLjFyZW0gMDsKICBib3JkZXItYm90dG9tOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsKICBjdXJzb3I6IHBvaW50ZXI7CiAgdHJhbnNpdGlvbjogYmFja2dyb3VuZCAwLjEyczsKICBib3JkZXItcmFkaXVzOiA0cHg7Cn0KLmFyY2gtaXRlbTpsYXN0LWNoaWxkIHsgYm9yZGVyLWJvdHRvbTogbm9uZTsgfQouYXJjaC1pdGVtOmhvdmVyIHsgYmFja2dyb3VuZDogdmFyKC0tYmczKTsgcGFkZGluZy1sZWZ0OiAwLjVyZW07IHBhZGRpbmctcmlnaHQ6IDAuNXJlbTsgbWFyZ2luOiAwIC0wLjVyZW07IH0KLmFyY2gtbnVtIHsKICB3aWR0aDogMjhweDsgaGVpZ2h0OiAyOHB4OyBib3JkZXItcmFkaXVzOiA2cHg7CiAgZGlzcGxheTogZmxleDsgYWxpZ24taXRlbXM6IGNlbnRlcjsganVzdGlmeS1jb250ZW50OiBjZW50ZXI7CiAgZm9udC1mYW1pbHk6IHZhcigtLW1vbm8pOyBmb250LXNpemU6IDExcHg7IGZvbnQtd2VpZ2h0OiA1MDA7CiAgZmxleC1zaHJpbms6IDA7IG1hcmdpbi10b3A6IDJweDsKfQouYXJjaC1udW0tYmx1ZSAgIHsgYmFja2dyb3VuZDogcmdiYSg1OSwxMzAsMjQ2LDAuMTUpOyBjb2xvcjogdmFyKC0tYWNjZW50Mik7IH0KLmFyY2gtbnVtLWFtYmVyICB7IGJhY2tncm91bmQ6IHJnYmEoMjQ1LDE1OCwxMSwwLjEyKTsgY29sb3I6ICNmYmJmMjQ7IH0KLmFyY2gtbnVtLWdyZWVuICB7IGJhY2tncm91bmQ6IHZhcigtLWdyZWVuLWJnKTsgY29sb3I6IHZhcigtLWdyZWVuKTsgfQouYXJjaC1udW0tcHVycGxlIHsgYmFja2dyb3VuZDogcmdiYSgxNjcsMTM5LDI1MCwwLjEyKTsgY29sb3I6ICNhNzhiZmE7IH0KLmFyY2gtbnVtLXRlYWwgICB7IGJhY2tncm91bmQ6IHJnYmEoMjAsMTg0LDE2NiwwLjEyKTsgY29sb3I6ICMyZGQ0YmY7IH0KLmFyY2gtY29udGVudCB7IGZsZXg6IDE7IG1pbi13aWR0aDogMDsgfQouYXJjaC10aXRsZSB7IGZvbnQtc2l6ZTogMTRweDsgZm9udC13ZWlnaHQ6IDUwMDsgY29sb3I6IHZhcigtLXRleHQpOyBtYXJnaW4tYm90dG9tOiAzcHg7IH0KLmFyY2gtZGVzYyB7IGZvbnQtc2l6ZTogMTJweDsgY29sb3I6IHZhcigtLW11dGVkKTsgbGluZS1oZWlnaHQ6IDEuNTU7IH0KLnRlY2gtcm93IHsgZGlzcGxheTogZmxleDsgZmxleC13cmFwOiB3cmFwOyBnYXA6IDVweDsgbWFyZ2luLXRvcDogOHB4OyB9Ci50ZWNoLXRhZyB7IGZvbnQtZmFtaWx5OiB2YXIoLS1tb25vKTsgZm9udC1zaXplOiAxMHB4OyBwYWRkaW5nOiAycHggN3B4OyBib3JkZXItcmFkaXVzOiAyMHB4OyBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1ib3JkZXIyKTsgY29sb3I6IHZhcigtLW11dGVkKTsgfQouYXJjaC1hcnJvdyB7IGNvbG9yOiB2YXIoLS1tdXRlZCk7IGZvbnQtc2l6ZTogMTRweDsgZmxleC1zaHJpbms6IDA7IG1hcmdpbi10b3A6IDVweDsgb3BhY2l0eTogMC40OyB9CgovKiDilIDilIAgQXJjaGl0ZWN0dXJlIGRpYWdyYW0gKFNWRykgc2VjdGlvbiDilIDilIAgKi8KLmRpYWdyYW0tc2VjdGlvbiB7IG1hcmdpbi10b3A6IDIuNXJlbTsgfQoucGlwZWxpbmUtZGlhZ3JhbSB7IHdpZHRoOiAxMDAlOyBiYWNrZ3JvdW5kOiB2YXIoLS1iZzIpOyBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1ib3JkZXIpOyBib3JkZXItcmFkaXVzOiAxMnB4OyBwYWRkaW5nOiAxLjVyZW07IG92ZXJmbG93LXg6IGF1dG87IH0KLnBpcGVsaW5lLWRpYWdyYW0gc3ZnIHsgZGlzcGxheTogYmxvY2s7IG1hcmdpbjogMCBhdXRvOyB9CgovKiDilIDilIAgQWJvdXQgc3RyaXAg4pSA4pSAICovCi5hYm91dC1zdHJpcCB7CiAgZGlzcGxheTogZ3JpZDsKICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IDFmciAxZnI7CiAgZ2FwOiAxLjVyZW07CiAgbWFyZ2luLXRvcDogM3JlbTsKICBwYWRkaW5nLXRvcDogMi41cmVtOwogIGJvcmRlci10b3A6IDFweCBzb2xpZCB2YXIoLS1ib3JkZXIpOwp9Ci5hYm91dC1jYXJkIHsgYmFja2dyb3VuZDogdmFyKC0tYmcyKTsgYm9yZGVyOiAxcHggc29saWQgdmFyKC0tYm9yZGVyKTsgYm9yZGVyLXJhZGl1czogMTJweDsgcGFkZGluZzogMS41cmVtOyB9Ci5hYm91dC1jYXJkIGgzIHsgZm9udC1mYW1pbHk6IHZhcigtLWRpc3BsYXkpOyBmb250LXNpemU6IDEuMDVyZW07IGZvbnQtd2VpZ2h0OiA3MDA7IGNvbG9yOiAjZmZmOyBtYXJnaW4tYm90dG9tOiAwLjVyZW07IH0KLmFib3V0LWNhcmQgcCB7IGZvbnQtc2l6ZTogMTNweDsgY29sb3I6IHZhcigtLW11dGVkKTsgbGluZS1oZWlnaHQ6IDEuNjU7IH0KLmFib3V0LWxpbmsgeyBkaXNwbGF5OiBpbmxpbmUtZmxleDsgYWxpZ24taXRlbXM6IGNlbnRlcjsgZ2FwOiA1cHg7IGZvbnQtc2l6ZTogMTNweDsgY29sb3I6IHZhcigtLWFjY2VudDIpOyB0ZXh0LWRlY29yYXRpb246IG5vbmU7IG1hcmdpbi10b3A6IDAuNzVyZW07IH0KLmFib3V0LWxpbms6aG92ZXIgeyB0ZXh0LWRlY29yYXRpb246IHVuZGVybGluZTsgfQoKLyog4pSA4pSAIEZvb3RlciDilIDilIAgKi8KZm9vdGVyIHsKICB0ZXh0LWFsaWduOiBjZW50ZXI7CiAgcGFkZGluZzogMnJlbSAxLjVyZW07CiAgYm9yZGVyLXRvcDogMXB4IHNvbGlkIHZhcigtLWJvcmRlcik7CiAgZm9udC1zaXplOiAxMnB4OwogIGNvbG9yOiB2YXIoLS1tdXRlZCk7CiAgZm9udC1mYW1pbHk6IHZhcigtLW1vbm8pOwp9CmZvb3RlciBhIHsgY29sb3I6IHZhcigtLWFjY2VudDIpOyB0ZXh0LWRlY29yYXRpb246IG5vbmU7IH0KZm9vdGVyIGE6aG92ZXIgeyB0ZXh0LWRlY29yYXRpb246IHVuZGVybGluZTsgfQoKLyog4pSA4pSAIFJ1biBidXR0b24g4pSA4pSAICovCi5ydW4tYnRuIHsKICBmb250LWZhbWlseTogdmFyKC0tbW9ubyk7CiAgZm9udC1zaXplOiAxMnB4OwogIHBhZGRpbmc6IDAuNDVyZW0gMXJlbTsKICBib3JkZXItcmFkaXVzOiA2cHg7CiAgYmFja2dyb3VuZDogcmdiYSg1OSwxMzAsMjQ2LDAuMTUpOwogIGNvbG9yOiB2YXIoLS1hY2NlbnQyKTsKICBib3JkZXI6IDFweCBzb2xpZCB2YXIoLS1hY2NlbnQpOwogIGN1cnNvcjogcG9pbnRlcjsKICB0cmFuc2l0aW9uOiBhbGwgMC4xNXM7Cn0KLnJ1bi1idG46aG92ZXI6bm90KDpkaXNhYmxlZCkgeyBiYWNrZ3JvdW5kOiByZ2JhKDU5LDEzMCwyNDYsMC4yNSk7IH0KLnJ1bi1idG46ZGlzYWJsZWQgeyBvcGFjaXR5OiAwLjQ7IGN1cnNvcjogbm90LWFsbG93ZWQ7IH0KCi8qIOKUgOKUgCBSZXNwb25zaXZlIOKUgOKUgCAqLwpAbWVkaWEgKG1heC13aWR0aDogNjQwcHgpIHsKICAua3BpLXJvdyB7IGdyaWQtdGVtcGxhdGUtY29sdW1uczogcmVwZWF0KDIsIDFmcik7IH0KICAuYWJvdXQtc3RyaXAgeyBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IDFmcjsgfQogIC5oZXJvIGgxIHsgZm9udC1zaXplOiAycmVtOyB9Cn0KQG1lZGlhIChwcmVmZXJzLXJlZHVjZWQtbW90aW9uOiByZWR1Y2UpIHsKICAqIHsgYW5pbWF0aW9uOiBub25lICFpbXBvcnRhbnQ7IHRyYW5zaXRpb246IG5vbmUgIWltcG9ydGFudDsgfQp9Cjwvc3R5bGU+CjwvaGVhZD4KPGJvZHk+Cgo8IS0tIOKUgOKUgCBIRVJPIOKUgOKUgCAtLT4KPGhlYWRlciBjbGFzcz0iaGVybyI+CiAgPGRpdiBjbGFzcz0iaGVyby1leWVicm93Ij5Qb3J0Zm9saW8gwrcgUmV2ZW51ZSBNYW5hZ2VtZW50ICZhbXA7IEFuYWx5dGljcyBBdXRvbWF0aW9uPC9kaXY+CiAgPGgxPkZhcmUgSW50ZWxsaWdlbmNlPGJyPjxzcGFuPlN1aXRlPC9zcGFuPjwvaDE+CiAgPHAgY2xhc3M9Imhlcm8tc3ViIj5BdXRvbWF0ZWQgbWFya2V0IGludGVsbGlnZW5jZSBhbmQgbGl2ZSBmYXJlIGNvbXBhcmlzb24gcGlwZWxpbmVzIGJ1aWx0IHRvIHN1cHBvcnQgZHluYW1pYyBhaXJsaW5lIHByaWNpbmcgYW5kIHlpZWxkIG9wdGltaXphdGlvbiBzdHJhdGVnaWVzLjwvcD4KICA8ZGl2IGNsYXNzPSJoZXJvLXBpbGxzIj4KICAgIDxzcGFuIGNsYXNzPSJwaWxsIj5QeXRob248L3NwYW4+CiAgICA8c3BhbiBjbGFzcz0icGlsbCI+UGxheXdyaWdodDwvc3Bhbj4KICAgIDxzcGFuIGNsYXNzPSJwaWxsIj5TdHJlYW1saXQ8L3NwYW4+CiAgICA8c3BhbiBjbGFzcz0icGlsbCI+Z3NwcmVhZDwvc3Bhbj4KICAgIDxzcGFuIGNsYXNzPSJwaWxsIj5QYW5kYXM8L3NwYW4+CiAgICA8c3BhbiBjbGFzcz0icGlsbCI+VkJBIC8gRXhjZWw8L3NwYW4+CiAgICA8c3BhbiBjbGFzcz0icGlsbCI+UEtSIMK3IFVTRCDCtyBBRUQgwrcgU0FSIMK3IEdCUDwvc3Bhbj4KICA8L2Rpdj4KICA8ZGl2IGNsYXNzPSJoZXJvLWxpbmtzIj4KICAgIDxhIGhyZWY9Imh0dHBzOi8vZ2l0aHViLmNvbS9IYW16YVNhcmZyYXp6IiBjbGFzcz0iYnRuIGJ0bi1wcmltYXJ5IiB0YXJnZXQ9Il9ibGFuayI+R2l0SHViIFByb2ZpbGUg4oaXPC9hPgogICAgPGEgaHJlZj0iaHR0cHM6Ly93d3cubGlua2VkaW4uY29tL2luL2hhbXphLXNhcmZyYXotYjgzMjIxMTg1IiBjbGFzcz0iYnRuIGJ0bi1naG9zdCIgdGFyZ2V0PSJfYmxhbmsiPkxpbmtlZEluIOKGlzwvYT4KICA8L2Rpdj4KPC9oZWFkZXI+Cgo8IS0tIOKUgOKUgCBNQUlOIOKUgOKUgCAtLT4KPG1haW4gY2xhc3M9Im1haW4iPgoKICA8IS0tIERhc2hib2FyZCBzZWN0aW9uIC0tPgogIDxkaXYgc3R5bGU9Im1hcmdpbi1ib3R0b206IDJyZW07Ij4KICAgIDxkaXYgY2xhc3M9InNlY3Rpb24tdGl0bGUiPkxpdmUgZGVtbzwvZGl2PgogICAgPGRpdiBjbGFzcz0ic2VjdGlvbi1oZWFkaW5nIj5GYXJlIGNvbXBhcmlzb24gZGFzaGJvYXJkPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJzZWN0aW9uLWRlc2MiPlN5bnRoZXRpYyBkYXRhIG1vZGVsbGVkIG9uIHJlYWwgZG9tZXN0aWMgYW5kIGludGVybmF0aW9uYWwgcm91dGUgcHJpY2luZy4gRmlsdGVyIGJ5IHJlZ2lvbiwgYWlybGluZSwgb3IgY3VycmVuY3kg4oCUIGV4YWN0bHkgYXMgdGhlIHByb2R1Y3Rpb24gUk0gZGFzaGJvYXJkIHdvcmtzLjwvZGl2PgogIDwvZGl2PgoKICA8ZGl2IGNsYXNzPSJjYXJkIj4KICAgIDxkaXYgY2xhc3M9InRhYnMiPgogICAgICA8YnV0dG9uIGNsYXNzPSJ0YWIgYWN0aXZlIiBvbmNsaWNrPSJzaG93VGFiKCdkYXNoYm9hcmQnLHRoaXMpIj5MaXZlIGRhc2hib2FyZDwvYnV0dG9uPgogICAgICA8YnV0dG9uIGNsYXNzPSJ0YWIiIG9uY2xpY2s9InNob3dUYWIoJ21hdHJpeCcsdGhpcykiPkZhcmUgbWF0cml4PC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiIgb25jbGljaz0ic2hvd1RhYignc2NyYXBlcicsdGhpcykiPlNjcmFwZXIgc2ltPC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiIgb25jbGljaz0ic2hvd1RhYignYXJjaCcsdGhpcykiPkFyY2hpdGVjdHVyZTwvYnV0dG9uPgogICAgPC9kaXY+CgogICAgPCEtLSBEYXNoYm9hcmQgdGFiIC0tPgogICAgPGRpdiBpZD0icGFuZWwtZGFzaGJvYXJkIiBjbGFzcz0icGFuZWwgYWN0aXZlIj4KICAgICAgPGRpdiBjbGFzcz0ia3BpLXJvdyI+CiAgICAgICAgPGRpdiBjbGFzcz0ia3BpIj48ZGl2IGNsYXNzPSJrcGktbGFiZWwiPlNlY3RvcnMgbW9uaXRvcmVkPC9kaXY+PGRpdiBjbGFzcz0ia3BpLXZhbCI+MTI8L2Rpdj48ZGl2IGNsYXNzPSJrcGktc3ViIj5VQUUgwrcgS1NBIMK3IFVLPC9kaXY+PC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0ia3BpIj48ZGl2IGNsYXNzPSJrcGktbGFiZWwiPkFpcmxpbmVzIHRyYWNrZWQ8L2Rpdj48ZGl2IGNsYXNzPSJrcGktdmFsIj40PC9kaXY+PGRpdiBjbGFzcz0ia3BpLXN1YiI+UEEsIFBLLCBFUiwgUTg8L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJrcGkiPjxkaXYgY2xhc3M9ImtwaS1sYWJlbCI+QmVzdCBmYXJlIHRvZGF5PC9kaXY+PGRpdiBjbGFzcz0ia3BpLXZhbCBncmVlbiIgaWQ9ImJlc3QtZmFyZSI+UEtSIDU0LDIwMDwvZGl2PjxkaXYgY2xhc3M9ImtwaS1zdWIiIGlkPSJiZXN0LXJvdXRlIj5LSEkg4oaSIERYQiDCtyBBaXIgQmx1ZTwvZGl2PjwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9ImtwaSI+PGRpdiBjbGFzcz0ia3BpLWxhYmVsIj5BdmcgdnMgeWVzdGVyZGF5PC9kaXY+PGRpdiBjbGFzcz0ia3BpLXZhbCBhbWJlciI+4oiSMy4yJTwvZGl2PjxkaXYgY2xhc3M9ImtwaS1zdWIiPkZhcmVzIHRyZW5kaW5nIGRvd248L2Rpdj48L2Rpdj4KICAgICAgPC9kaXY+CgogICAgICA8ZGl2IGNsYXNzPSJmaWx0ZXItcm93Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJzZWxlY3Qtd3JhcCI+PHNlbGVjdCBpZD0icmVnaW9uLWZpbHRlciIgb25jaGFuZ2U9InJlbmRlckZhcmVUYWJsZSgpIj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9ImFsbCI+QWxsIHJlZ2lvbnM8L29wdGlvbj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9IlVBRSI+VUFFPC9vcHRpb24+CiAgICAgICAgICA8b3B0aW9uIHZhbHVlPSJLU0EiPktTQTwvb3B0aW9uPgogICAgICAgICAgPG9wdGlvbiB2YWx1ZT0iVUsiPlVLPC9vcHRpb24+CiAgICAgICAgPC9zZWxlY3Q+PC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0ic2VsZWN0LXdyYXAiPjxzZWxlY3QgaWQ9ImFpcmxpbmUtZmlsdGVyIiBvbmNoYW5nZT0icmVuZGVyRmFyZVRhYmxlKCkiPgogICAgICAgICAgPG9wdGlvbiB2YWx1ZT0iYWxsIj5BbGwgYWlybGluZXM8L29wdGlvbj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9IlBBIj5BaXIgQmx1ZSAoUEEpPC9vcHRpb24+CiAgICAgICAgICA8b3B0aW9uIHZhbHVlPSJQSyI+UElBIChQSyk8L29wdGlvbj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9IkVSIj5LYW0gQWlyIChFUik8L29wdGlvbj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9IlE4Ij5LdXdhaXQgQWlyd2F5cyAoUTgpPC9vcHRpb24+CiAgICAgICAgPC9zZWxlY3Q+PC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0ic3BhY2VyIj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJjeC1yb3ciPgogICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iY3gtYnRuIGFjdGl2ZSIgb25jbGljaz0ic2V0Q3VycmVuY3koJ1BLUicsdGhpcykiPlBLUjwvYnV0dG9uPgogICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iY3gtYnRuIiBvbmNsaWNrPSJzZXRDdXJyZW5jeSgnVVNEJyx0aGlzKSI+VVNEPC9idXR0b24+CiAgICAgICAgICA8YnV0dG9uIGNsYXNzPSJjeC1idG4iIG9uY2xpY2s9InNldEN1cnJlbmN5KCdBRUQnLHRoaXMpIj5BRUQ8L2J1dHRvbj4KICAgICAgICAgIDxidXR0b24gY2xhc3M9ImN4LWJ0biIgb25jbGljaz0ic2V0Q3VycmVuY3koJ1NBUicsdGhpcykiPlNBUjwvYnV0dG9uPgogICAgICAgICAgPGJ1dHRvbiBjbGFzcz0iY3gtYnRuIiBvbmNsaWNrPSJzZXRDdXJyZW5jeSgnR0JQJyx0aGlzKSI+R0JQPC9idXR0b24+CiAgICAgICAgPC9kaXY+CiAgICAgIDwvZGl2PgoKICAgICAgPHRhYmxlIGNsYXNzPSJmYXJlLXRhYmxlIj4KICAgICAgICA8dGhlYWQ+PHRyPgogICAgICAgICAgPHRoPlJvdXRlPC90aD48dGg+QWlybGluZTwvdGg+PHRoPkRlcCB0aW1lPC90aD48dGg+RmFyZTwvdGg+PHRoPlN0b3BzPC90aD48dGg+VGFnPC90aD4KICAgICAgICA8L3RyPjwvdGhlYWQ+CiAgICAgICAgPHRib2R5IGlkPSJmYXJlLXRib2R5Ij48L3Rib2R5PgogICAgICA8L3RhYmxlPgogICAgPC9kaXY+CgogICAgPCEtLSBNYXRyaXggdGFiIC0tPgogICAgPGRpdiBpZD0icGFuZWwtbWF0cml4IiBjbGFzcz0icGFuZWwiPgogICAgICA8ZGl2IHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO21hcmdpbi1ib3R0b206MXJlbTtmbGV4LXdyYXA6d3JhcDtnYXA6OHB4OyI+CiAgICAgICAgPGRpdj4KICAgICAgICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZToxM3B4O2ZvbnQtd2VpZ2h0OjUwMDtjb2xvcjp2YXIoLS10ZXh0KTttYXJnaW4tYm90dG9tOjNweDsiPjctZGF5IGZhcmUgbWF0cml4PC9kaXY+CiAgICAgICAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6MTJweDtjb2xvcjp2YXIoLS1tdXRlZCk7Ij5Db2xvciA9IHByaWNlIHRpZXIgcmVsYXRpdmUgdG8gcm91dGUgYXZlcmFnZS4gR3JlZW4gPSBjaGVhcGVzdCB3aW5kb3cuPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2dhcDoxMHB4O2ZvbnQtc2l6ZToxMXB4O2NvbG9yOnZhcigtLW11dGVkKTthbGlnbi1pdGVtczpjZW50ZXI7Ij4KICAgICAgICAgIDxzcGFuIHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo0cHg7Ij48c3BhbiBzdHlsZT0id2lkdGg6MTBweDtoZWlnaHQ6MTBweDtib3JkZXItcmFkaXVzOjJweDtiYWNrZ3JvdW5kOnJnYmEoMzQsMTk3LDk0LDAuMik7ZGlzcGxheTppbmxpbmUtYmxvY2s7Ij48L3NwYW4+QmVzdDwvc3Bhbj4KICAgICAgICAgIDxzcGFuIHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo0cHg7Ij48c3BhbiBzdHlsZT0id2lkdGg6MTBweDtoZWlnaHQ6MTBweDtib3JkZXItcmFkaXVzOjJweDtiYWNrZ3JvdW5kOnJnYmEoMjQ1LDE1OCwxMSwwLjIpO2Rpc3BsYXk6aW5saW5lLWJsb2NrOyI+PC9zcGFuPk1pZDwvc3Bhbj4KICAgICAgICAgIDxzcGFuIHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo0cHg7Ij48c3BhbiBzdHlsZT0id2lkdGg6MTBweDtoZWlnaHQ6MTBweDtib3JkZXItcmFkaXVzOjJweDtiYWNrZ3JvdW5kOnJnYmEoMjM5LDY4LDY4LDAuMik7ZGlzcGxheTppbmxpbmUtYmxvY2s7Ij48L3NwYW4+SGlnaDwvc3Bhbj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9Im1hdHJpeC13cmFwIj48dGFibGUgY2xhc3M9Im1hdHJpeC10YWJsZSIgaWQ9Im1hdHJpeC10YWJsZSI+PC90YWJsZT48L2Rpdj4KICAgIDwvZGl2PgoKICAgIDwhLS0gU2NyYXBlciBzaW0gdGFiIC0tPgogICAgPGRpdiBpZD0icGFuZWwtc2NyYXBlciIgY2xhc3M9InBhbmVsIj4KICAgICAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjttYXJnaW4tYm90dG9tOjFyZW07Ij4KICAgICAgICA8ZGl2PgogICAgICAgICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjEzcHg7Zm9udC13ZWlnaHQ6NTAwO2NvbG9yOnZhcigtLXRleHQpO21hcmdpbi1ib3R0b206MnB4OyI+U2NyYXBlciBzaW11bGF0aW9uPC9kaXY+CiAgICAgICAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6MTJweDtjb2xvcjp2YXIoLS1tdXRlZCk7Ij5TaW11bGF0ZXMgdGhlIGFjdHVhbCBzY3JhcGluZyBsb29wOiBzdGFsbCBkZXRlY3Rpb24sIHJldHJ5IGxvZ2ljLCBhbmQgU2hlZXRzIHB1c2guPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0icnVuLWJ0biIgaWQ9InJ1bi1idG4iIG9uY2xpY2s9InJ1blNjcmFwZXIoKSI+4pa2IFJ1biBzY3JhcGVyPC9idXR0b24+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJzY3JhcGVyLWdyaWQiIGlkPSJzY3JhcGVyLWdyaWQiPjwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJsb2ctdGVybWluYWwiIGlkPSJsb2ctYm94Ij48c3BhbiBjbGFzcz0ibG9nLWciPiMgQ2xpY2sgIlJ1biBzY3JhcGVyIiB0byBzaW11bGF0ZSBhIGxpdmUgc2Vzc2lvbjwvc3Bhbj48L2Rpdj4KICAgIDwvZGl2PgoKICAgIDwhLS0gQXJjaGl0ZWN0dXJlIHRhYiAtLT4KICAgIDxkaXYgaWQ9InBhbmVsLWFyY2giIGNsYXNzPSJwYW5lbCI+CiAgICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZToxM3B4O2NvbG9yOnZhcigtLW11dGVkKTttYXJnaW4tYm90dG9tOjEuMjVyZW07Ij5GaXZlLWxheWVyIHBpcGVsaW5lOiBmcm9tIGJyb3dzZXIgYXV0b21hdGlvbiB0aHJvdWdoIHRvIEdvb2dsZSBTaGVldHMgc3luYy48L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iYXJjaC1saXN0Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWl0ZW0iPgogICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1udW0gYXJjaC1udW0tYmx1ZSI+MDE8L2Rpdj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImFyY2gtY29udGVudCI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImFyY2gtdGl0bGUiPkJyb3dzZXIgYXV0b21hdGlvbiBsYXllcjwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWRlc2MiPlBsYXl3cmlnaHQgbGF1bmNoZXMgYSBwZXJzaXN0ZW50IENocm9taXVtIGNvbnRleHQgd2l0aCBzdGVhbHRoIG1vZGUuIEEgSlNPTi5wYXJzZSBob29rIGludGVyY2VwdHMgZmxpZ2h0IGJhdGNoIHBheWxvYWRzIGJlZm9yZSB0aGUgRE9NIHJlbmRlcnMgdGhlbS4gU3RhbGwgZGV0ZWN0aW9uIGZpcmVzIGlmIHplcm8gZGF0YSBpcyByZWNlaXZlZCBmb3IgMTIwcyDigJQgYnJvd3NlciBhdXRvLXJlc3RhcnRzLCB1cCB0byAzIHJldHJpZXMgcGVyIHNlY3Rvci4gQSByYW5kb20gMjDigJM0MHMgc2xlZXAgYmV0d2VlbiBzZWN0b3JzIG1pbWljcyBodW1hbiBicm93c2luZyBjYWRlbmNlLjwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJ0ZWNoLXJvdyI+PHNwYW4gY2xhc3M9InRlY2gtdGFnIj5wbGF5d3JpZ2h0PC9zcGFuPjxzcGFuIGNsYXNzPSJ0ZWNoLXRhZyI+cGxheXdyaWdodC1zdGVhbHRoPC9zcGFuPjxzcGFuIGNsYXNzPSJ0ZWNoLXRhZyI+Y2hyb21pdW08L3NwYW4+PHNwYW4gY2xhc3M9InRlY2gtdGFnIj5hc3luY19wbGF5d3JpZ2h0PC9zcGFuPjwvZGl2PgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWFycm93Ij7ihpI8L2Rpdj4KICAgICAgICA8L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWl0ZW0iPgogICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1udW0gYXJjaC1udW0tYW1iZXIiPjAyPC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWNvbnRlbnQiPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLXRpdGxlIj5Ob3JtYWxpemF0aW9uICZhbXA7IHBhcnNpbmcgbGF5ZXI8L2Rpdj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1kZXNjIj5SYXcgSlNPTiBiYXRjaGVzIGFyZSBkZS1kdXBsaWNhdGVkIGJ5IGhhc2guIEVhY2ggZmxpZ2h0IGlzIGV2YWx1YXRlZCBmb3Igbm9uLXN0b3Agc3RhdHVzIHZpYSBhIDMtY29uZGl0aW9uIGNoZWNrIChsZWcgY291bnQsIHNlZ21lbnQgY291bnQsIHN0b3AgbGFiZWwpLiBEZXBhcnR1cmUgdGltZXMgYXJlIG5vcm1hbGl6ZWQgdG8gMTJoIGZvcm1hdCBhY3Jvc3MgZGF0ZS10aW1lIHN0cmluZ3MsIElTTyB0aW1lc3RhbXBzLCBhbmQgcmF3IEhIOk1NIHZhbHVlcy4gT25seSB0aGUgY2hlYXBlc3QgZmFyZSBwZXIgKHJvdXRlLCBmbGlnaHRfbnVtYmVyKSBwYWlyIGlzIHJldGFpbmVkLjwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJ0ZWNoLXJvdyI+PHNwYW4gY2xhc3M9InRlY2gtdGFnIj5wYW5kYXM8L3NwYW4+PHNwYW4gY2xhc3M9InRlY2gtdGFnIj5yZWdleDwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPmRhdGV0aW1lPC9zcGFuPjxzcGFuIGNsYXNzPSJ0ZWNoLXRhZyI+anNvbjwvc3Bhbj48L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1hcnJvdyI+4oaSPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1pdGVtIj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImFyY2gtbnVtIGFyY2gtbnVtLWdyZWVuIj4wMzwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1jb250ZW50Ij4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC10aXRsZSI+TXVsdGktY3VycmVuY3kgaGFuZGxpbmc8L2Rpdj4KICAgICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1kZXNjIj5FYWNoIHRpbWUgc2xvdCAoMTBhbSwgNHBtLCA2cG0sIDlwbSkgaXMgaW5kZXBlbmRlbnRseSBjb25maWd1cmVkIHdpdGggYSB0YXJnZXQgY3VycmVuY3kuIFRoZSBVUkwgYnVpbGRlciBhcHBlbmRzICZhbXA7Y3VycmVuY3k9IGZvciBub24tUEtSIHJlcXVlc3RzOyB0aGUgQVBJIHJldHVybnMgcHJlLWNvbnZlcnRlZCBwcmljZXMgaW4gdGhlIHBheWxvYWQuIENvdmVyYWdlOiBQS1IsIFVTRCwgR0JQLCBBRUQsIFNBUiBhY3Jvc3MgNDArIGFpcnBvcnQgY29kZSBwYWlycyBpbiBEb21lc3RpYywgVUFFLCBhbmQgS1NBIG1hcmtldHMuPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9InRlY2gtcm93Ij48c3BhbiBjbGFzcz0idGVjaC10YWciPlBLUjwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPlVTRDwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPkFFRDwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPlNBUjwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPkdCUDwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPnVybGxpYi5wYXJzZTwvc3Bhbj48L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1hcnJvdyI+4oaSPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1pdGVtIj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImFyY2gtbnVtIGFyY2gtbnVtLXB1cnBsZSI+MDQ8L2Rpdj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImFyY2gtY29udGVudCI+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9ImFyY2gtdGl0bGUiPkdvb2dsZSBTaGVldHMgc3luYzwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWRlc2MiPkEgQ09ORklHIHdvcmtzaGVldCBtYXBzIChyb3V0ZSwgZmxpZ2h0X251bWJlcikgcGFpcnMgdG8gZXhhY3QgY2VsbCBhZGRyZXNzZXMuIEFsbCBmYXJlIGFuZCB0aW1lIHVwZGF0ZXMgYXJlIGJhdGNoZWQgaW50byBhIHNpbmdsZSBiYXRjaF91cGRhdGUoKSBjYWxsIHRvIHN0YXkgd2l0aGluIFNoZWV0cyBBUEkgcmF0ZSBsaW1pdHMuIFVubWFwcGVkIGZsaWdodHMgYXJlIGxvZ2dlZCBzZXBhcmF0ZWx5IGZvciByZXZpZXcuIFRpbWVzdGFtcCBjZWxscyB1cGRhdGUgYXV0b21hdGljYWxseSBvbiBldmVyeSBwdXNoLCBnaXZpbmcgUk0gc3RhZmYgYSBjbGVhciBkYXRhLWZyZXNobmVzcyBpbmRpY2F0b3IuPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9InRlY2gtcm93Ij48c3BhbiBjbGFzcz0idGVjaC10YWciPmdzcHJlYWQ8L3NwYW4+PHNwYW4gY2xhc3M9InRlY2gtdGFnIj5nb29nbGUtb2F1dGgyPC9zcGFuPjxzcGFuIGNsYXNzPSJ0ZWNoLXRhZyI+YmF0Y2hfdXBkYXRlPC9zcGFuPjxzcGFuIGNsYXNzPSJ0ZWNoLXRhZyI+U2hlZXRzIEFQSSB2NDwvc3Bhbj48L2Rpdj4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1hcnJvdyI+4oaSPC9kaXY+CiAgICAgICAgPC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0iYXJjaC1pdGVtIj4KICAgICAgICAgIDxkaXYgY2xhc3M9ImFyY2gtbnVtIGFyY2gtbnVtLXRlYWwiPjA1PC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWNvbnRlbnQiPgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLXRpdGxlIj5TdHJlYW1saXQgQ2xvdWQgZGVwbG95bWVudDwvZGl2PgogICAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWRlc2MiPkRlcGxveWVkIHRvIFN0cmVhbWxpdCBDbG91ZCB3aXRoIENocm9taXVtIGluc3RhbGxlZCBhdCBydW50aW1lIHZpYSBzZXR1cC5zaC4gU2VjcmV0cyAoR0NQIHNlcnZpY2UgYWNjb3VudCwgc3ByZWFkc2hlZXQgSURzIHBlciBzbG90KSBhcmUgc3RvcmVkIGluIHN0LnNlY3JldHMuIEEgcGVyc2lzdGVudCBRdWV1ZSBicmlkZ2VzIHRoZSBiYWNrZ3JvdW5kIHNjcmFwaW5nIHRocmVhZCB0byB0aGUgU3RyZWFtbGl0IFVJLCBlbmFibGluZyByZWFsLXRpbWUgbG9nIHN0cmVhbWluZyBhbmQgbGl2ZSBkYXRhIHRhYmxlIHVwZGF0ZXMgd2l0aG91dCBwYWdlIHJlZnJlc2guPC9kaXY+CiAgICAgICAgICAgIDxkaXYgY2xhc3M9InRlY2gtcm93Ij48c3BhbiBjbGFzcz0idGVjaC10YWciPnN0cmVhbWxpdDwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPnNldHVwLnNoPC9zcGFuPjxzcGFuIGNsYXNzPSJ0ZWNoLXRhZyI+c3Quc2VjcmV0czwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPnRocmVhZGluZzwvc3Bhbj48c3BhbiBjbGFzcz0idGVjaC10YWciPlF1ZXVlPC9zcGFuPjwvZGl2PgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzPSJhcmNoLWFycm93Ij7ihpI8L2Rpdj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KICA8L2Rpdj4KCiAgPCEtLSBQaXBlbGluZSBkaWFncmFtIC0tPgogIDxkaXYgY2xhc3M9ImRpYWdyYW0tc2VjdGlvbiI+CiAgICA8ZGl2IHN0eWxlPSJtYXJnaW4tYm90dG9tOjEuNXJlbTsiPgogICAgICA8ZGl2IGNsYXNzPSJzZWN0aW9uLXRpdGxlIj5QaXBlbGluZSBvdmVydmlldzwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJzZWN0aW9uLWhlYWRpbmciPkhvdyBkYXRhIGZsb3dzPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9InNlY3Rpb24tZGVzYyI+RnJvbSBzb3VyY2UgVVJMIGNvbnN0cnVjdGlvbiB0byBHb29nbGUgU2hlZXRzIGNlbGwgdXBkYXRlIOKAlCBldmVyeSBzdGFnZSBpbiB0aGUgcGlwZWxpbmUuPC9kaXY+CiAgICA8L2Rpdj4KICAgIDxkaXYgY2xhc3M9InBpcGVsaW5lLWRpYWdyYW0iPgogICAgICA8c3ZnIHdpZHRoPSIxMDAlIiB2aWV3Qm94PSIwIDAgOTYwIDE2MCIgcm9sZT0iaW1nIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgICAgIDx0aXRsZT5GYXJlIEludGVsbGlnZW5jZSBQaXBlbGluZSBGbG93PC90aXRsZT4KICAgICAgICA8ZGVzYz5GaXZlLXN0YWdlIHBpcGVsaW5lOiBVUkwgQnVpbGRlciB0byBCcm93c2VyIFNjcmFwZSB0byBQYXJzZSBhbmQgTm9ybWFsaXplIHRvIEN1cnJlbmN5IENvbnZlcnNpb24gdG8gU2hlZXRzIFB1c2g8L2Rlc2M+CiAgICAgICAgPGRlZnM+CiAgICAgICAgICA8bWFya2VyIGlkPSJhcnIiIHZpZXdCb3g9IjAgMCAxMCAxMCIgcmVmWD0iOCIgcmVmWT0iNSIgbWFya2VyV2lkdGg9IjYiIG1hcmtlckhlaWdodD0iNiIgb3JpZW50PSJhdXRvLXN0YXJ0LXJldmVyc2UiPgogICAgICAgICAgICA8cGF0aCBkPSJNMiAxTDggNUwyIDkiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzNiODJmNiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogICAgICAgICAgPC9tYXJrZXI+CiAgICAgICAgPC9kZWZzPgoKICAgICAgICA8IS0tIFN0YWdlIGJveGVzIC0tPgogICAgICAgIDwhLS0gMTogVVJMIEJ1aWxkZXIgLS0+CiAgICAgICAgPHJlY3QgeD0iMjAiIHk9IjQ0IiB3aWR0aD0iMTQ4IiBoZWlnaHQ9IjcyIiByeD0iOCIgZmlsbD0iIzExMTgyNyIgc3Ryb2tlPSIjMWQ0ZWQ4IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSI5NCIgeT0iNzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2MGE1ZmEiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9IjUwMCI+MDEgwrcgVVJMIEJVSUxERVI8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iOTQiIHk9Ijg4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjN2E4NDk5IiBmb250LWZhbWlseT0iJ0ludGVyJyxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIj5TZWN0b3IgKyBkYXRlICs8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iOTQiIHk9IjEwMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzdhODQ5OSIgZm9udC1mYW1pbHk9IidJbnRlcicsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSI+Y3VycmVuY3kg4oaSIFVSTDwvdGV4dD4KCiAgICAgICAgPCEtLSBhcnJvdyAx4oaSMiAtLT4KICAgICAgICA8bGluZSB4MT0iMTY4IiB5MT0iODAiIHgyPSIyMDgiIHkyPSI4MCIgc3Ryb2tlPSIjM2I4MmY2IiBzdHJva2Utd2lkdGg9IjEuNSIgbWFya2VyLWVuZD0idXJsKCNhcnIpIi8+CgogICAgICAgIDwhLS0gMjogQnJvd3NlciAvIFBsYXl3cmlnaHQgLS0+CiAgICAgICAgPHJlY3QgeD0iMjEwIiB5PSI0NCIgd2lkdGg9IjE0OCIgaGVpZ2h0PSI3MiIgcng9IjgiIGZpbGw9IiMxMTE4MjciIHN0cm9rZT0iIzkyNDAwZSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgICAgPHRleHQgeD0iMjg0IiB5PSI3MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZiYmYyNCIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsbW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNTAwIj4wMiDCtyBQTEFZV1JJR0hUPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjI4NCIgeT0iODgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM3YTg0OTkiIGZvbnQtZmFtaWx5PSInSW50ZXInLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiPlN0ZWFsdGggYnJvd3Nlciw8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iMjg0IiB5PSIxMDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM3YTg0OTkiIGZvbnQtZmFtaWx5PSInSW50ZXInLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiPkpTT04gaG9vaywgc3RhbGwgZGV0ZWN0PC90ZXh0PgoKICAgICAgICA8IS0tIGFycm93IDLihpIzIC0tPgogICAgICAgIDxsaW5lIHgxPSIzNTgiIHkxPSI4MCIgeDI9IjM5OCIgeTI9IjgwIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMS41IiBtYXJrZXItZW5kPSJ1cmwoI2FycikiLz4KCiAgICAgICAgPCEtLSAzOiBQYXJzZSAmIE5vcm1hbGl6ZSAtLT4KICAgICAgICA8cmVjdCB4PSI0MDAiIHk9IjQ0IiB3aWR0aD0iMTQ4IiBoZWlnaHQ9IjcyIiByeD0iOCIgZmlsbD0iIzExMTgyNyIgc3Ryb2tlPSIjMDY1ZjQ2IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgICAgICA8dGV4dCB4PSI0NzQiIHk9IjcwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNGFkZTgwIiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJyxtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSI1MDAiPjAzIMK3IE5PUk1BTElaRTwvdGV4dD4KICAgICAgICA8dGV4dCB4PSI0NzQiIHk9Ijg4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjN2E4NDk5IiBmb250LWZhbWlseT0iJ0ludGVyJyxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIj5EZWR1cCDCtyBub25zdG9wIGZpbHRlcjwvdGV4dD4KICAgICAgICA8dGV4dCB4PSI0NzQiIHk9IjEwMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzdhODQ5OSIgZm9udC1mYW1pbHk9IidJbnRlcicsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMSI+wrcgY2hlYXBlc3QgcGVyIGZsaWdodDwvdGV4dD4KCiAgICAgICAgPCEtLSBhcnJvdyAz4oaSNCAtLT4KICAgICAgICA8bGluZSB4MT0iNTQ4IiB5MT0iODAiIHgyPSI1ODgiIHkyPSI4MCIgc3Ryb2tlPSIjM2I4MmY2IiBzdHJva2Utd2lkdGg9IjEuNSIgbWFya2VyLWVuZD0idXJsKCNhcnIpIi8+CgogICAgICAgIDwhLS0gNDogQ3VycmVuY3kgLS0+CiAgICAgICAgPHJlY3QgeD0iNTkwIiB5PSI0NCIgd2lkdGg9IjE0OCIgaGVpZ2h0PSI3MiIgcng9IjgiIGZpbGw9IiMxMTE4MjciIHN0cm9rZT0iIzRjMWQ5NSIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgICAgPHRleHQgeD0iNjY0IiB5PSI3MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E3OGJmYSIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsbW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNTAwIj4wNCDCtyBDVVJSRU5DWTwvdGV4dD4KICAgICAgICA8dGV4dCB4PSI2NjQiIHk9Ijg4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjN2E4NDk5IiBmb250LWZhbWlseT0iJ0ludGVyJyxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIj5QS1IgLyBVU0QgLyBBRUQ8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iNjY0IiB5PSIxMDIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM3YTg0OTkiIGZvbnQtZmFtaWx5PSInSW50ZXInLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiPlNBUiAvIEdCUDwvdGV4dD4KCiAgICAgICAgPCEtLSBhcnJvdyA04oaSNSAtLT4KICAgICAgICA8bGluZSB4MT0iNzM4IiB5MT0iODAiIHgyPSI3NzgiIHkyPSI4MCIgc3Ryb2tlPSIjM2I4MmY2IiBzdHJva2Utd2lkdGg9IjEuNSIgbWFya2VyLWVuZD0idXJsKCNhcnIpIi8+CgogICAgICAgIDwhLS0gNTogU2hlZXRzIFB1c2ggLS0+CiAgICAgICAgPHJlY3QgeD0iNzgwIiB5PSI0NCIgd2lkdGg9IjE2MCIgaGVpZ2h0PSI3MiIgcng9IjgiIGZpbGw9IiMxMTE4MjciIHN0cm9rZT0iIzBlNzQ5MCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICAgICAgPHRleHQgeD0iODYwIiB5PSI3MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzJkZDRiZiIgZm9udC1mYW1pbHk9IidKZXRCcmFpbnMgTW9ubycsbW9ub3NwYWNlIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iNTAwIj4wNSDCtyBTSEVFVFMgUFVTSDwvdGV4dD4KICAgICAgICA8dGV4dCB4PSI4NjAiIHk9Ijg4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjN2E4NDk5IiBmb250LWZhbWlseT0iJ0ludGVyJyxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIj5DT05GSUcgbWFwIOKGkiBjZWxsPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9Ijg2MCIgeT0iMTAyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjN2E4NDk5IiBmb250LWZhbWlseT0iJ0ludGVyJyxzYW5zLXNlcmlmIiBmb250LXNpemU9IjExIj5iYXRjaF91cGRhdGUoKTwvdGV4dD4KCiAgICAgICAgPCEtLSBTdGFnZSBsYWJlbHMgYmVsb3cgLS0+CiAgICAgICAgPHRleHQgeD0iOTQiICB5PSIxMzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzZDRhNjMiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSI5Ij51cmxsaWIucGFyc2U8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iMjg0IiB5PSIxMzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzZDRhNjMiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSI5Ij5wbGF5d3JpZ2h0LXN0ZWFsdGg8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iNDc0IiB5PSIxMzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzZDRhNjMiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSI5Ij5wYW5kYXMgwrcgcmVnZXg8L3RleHQ+CiAgICAgICAgPHRleHQgeD0iNjY0IiB5PSIxMzgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzZDRhNjMiIGZvbnQtZmFtaWx5PSInSmV0QnJhaW5zIE1vbm8nLG1vbm9zcGFjZSIgZm9udC1zaXplPSI5Ij41IGN1cnJlbmNpZXMgwrcgNDArIGNvZGVzPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9Ijg2MCIgeT0iMTM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjM2Q0YTYzIiBmb250LWZhbWlseT0iJ0pldEJyYWlucyBNb25vJyxtb25vc3BhY2UiIGZvbnQtc2l6ZT0iOSI+Z3NwcmVhZCDCtyBTaGVldHMgQVBJIHY0PC90ZXh0PgogICAgICA8L3N2Zz4KICAgIDwvZGl2PgogIDwvZGl2PgoKICA8IS0tIEFib3V0IHN0cmlwIC0tPgogIDxkaXYgY2xhc3M9ImFib3V0LXN0cmlwIj4KICAgIDxkaXYgY2xhc3M9ImFib3V0LWNhcmQiPgogICAgICA8aDM+QWJvdXQgdGhpcyBwcm9qZWN0PC9oMz4KICAgICAgPHA+VGhlIEZhcmUgSW50ZWxsaWdlbmNlIFN1aXRlIGlzIGEgcHJvZHVjdGlvbi1ncmFkZSBwaXBlbGluZSBJIGJ1aWx0IGZvciBkYWlseSBjb21wZXRpdGl2ZSBwcmljaW5nIGludGVsbGlnZW5jZSBhdCBhbiBhaXJsaW5lLiBJdCBhdXRvbm9tb3VzbHkgc2NyYXBlcywgbm9ybWFsaXplcywgYW5kIHB1c2hlcyBmbGlnaHQgZmFyZSBkYXRhIGFjcm9zcyBkb21lc3RpYyBhbmQgaW50ZXJuYXRpb25hbCBzZWN0b3JzIHRvIEdvb2dsZSBTaGVldHMg4oCUIGVuYWJsaW5nIHRoZSBSZXZlbnVlIE1hbmFnZW1lbnQgdGVhbSB0byBhY3Qgb24gbGl2ZSBwcmljaW5nIGRhdGEgd2l0aG91dCBtYW51YWwgZWZmb3J0LjwvcD4KICAgICAgPHAgc3R5bGU9Im1hcmdpbi10b3A6MC41cmVtOyI+QWxsIGRhdGEgaW4gdGhpcyBkZW1vIGlzIHN5bnRoZXRpYy4gVGhlIGFyY2hpdGVjdHVyZSwgY29kZSBwYXR0ZXJucywgYW5kIGVuZ2luZWVyaW5nIGRlY2lzaW9ucyBhcmUgcmVhbC48L3A+CiAgICA8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImFib3V0LWNhcmQiPgogICAgICA8aDM+QWJvdXQgbWU8L2gzPgogICAgICA8cD5SZXZlbnVlIE1hbmFnZW1lbnQgQW5hbHlzdCBhbmQgRGF0YSBFbmdpbmVlciB3aXRoIDIrIHllYXJzIGJ1aWxkaW5nIGF1dG9tYXRpb24gdG9vbHMgZm9yIHRoZSBhaXJsaW5lIGluZHVzdHJ5LiBJIGRlc2lnbiBzeXN0ZW1zIHRoYXQgY29ubmVjdCBicm93c2VyLWxldmVsIGRhdGEgYWNxdWlzaXRpb24gdG8gYW5hbHlzdC1yZWFkeSBkYXNoYm9hcmRzIOKAlCBQeXRob24sIFBsYXl3cmlnaHQsIFN0cmVhbWxpdCwgUGFuZGFzLCBhbmQgR29vZ2xlIFdvcmtzcGFjZSBBUElzLjwvcD4KICAgICAgPGEgaHJlZj0iaHR0cHM6Ly9naXRodWIuY29tL0hhbXphU2FyZnJhenoiIGNsYXNzPSJhYm91dC1saW5rIiB0YXJnZXQ9Il9ibGFuayI+R2l0SHViIOKAlCBIYW16YVNhcmZyYXp6IOKGlzwvYT48YnI+CiAgICAgIDxhIGhyZWY9Imh0dHBzOi8vd3d3LmxpbmtlZGluLmNvbS9pbi9oYW16YS1zYXJmcmF6LWI4MzIyMTE4NSIgY2xhc3M9ImFib3V0LWxpbmsiIHRhcmdldD0iX2JsYW5rIj5MaW5rZWRJbiDihpc8L2E+CiAgICAgIDxhIGhyZWY9Im1haWx0bzpoYW16YXNhcmZyYXouYWFoQGdtYWlsLmNvbSIgY2xhc3M9ImFib3V0LWxpbmsiPmhhbXphc2FyZnJhei5hYWhAZ21haWwuY29tIOKGlzwvYT4KICAgIDwvZGl2PgogIDwvZGl2PgoKPC9tYWluPgoKPGZvb3Rlcj4KICBCdWlsdCBieSA8YSBocmVmPSJodHRwczovL2dpdGh1Yi5jb20vSGFtemFTYXJmcmF6eiIgdGFyZ2V0PSJfYmxhbmsiPkhhbXphIFNhcmZyYXo8L2E+IMK3IFN5bnRoZXRpYyBkZW1vIGRhdGEgwrcgUmVhbCBhcmNoaXRlY3R1cmUgJm5ic3A7wrcmbmJzcDsgPGEgaHJlZj0iaHR0cHM6Ly9naXRodWIuY29tL0hhbXphU2FyZnJhenovRGFpbHlfRG9tZXN0aWNfQ29tcGFyaXNvbiIgdGFyZ2V0PSJfYmxhbmsiPlZpZXcgc291cmNlIG9uIEdpdEh1YiDihpc8L2E+CjwvZm9vdGVyPgoKPHNjcmlwdD4KLyog4pSA4pSAIERhdGEg4pSA4pSAICovCmNvbnN0IEZBUkVTID0gWwogIHtyb3V0ZToiS0hJIOKGkiBEWEIiLCByZWdpb246IlVBRSIsIGFpcmxpbmU6IlBBIiwgZGVwOiIwNzozMCBBTSIsIHBrcjo1NDIwMCwgIHVzZDoxOTQsICBhZWQ6NzEzLCAgc2FyOjcyOCwgIGdicDoxNTMsIHN0b3BzOjAsIHRhZzoiYmVzdCJ9LAogIHtyb3V0ZToiS0hJIOKGkiBEWEIiLCByZWdpb246IlVBRSIsIGFpcmxpbmU6IlBLIiwgZGVwOiIwOToxNSBBTSIsIHBrcjo1ODkwMCwgIHVzZDoyMTEsICBhZWQ6Nzc0LCAgc2FyOjc5MSwgIGdicDoxNjYsIHN0b3BzOjAsIHRhZzoiZGlyZWN0In0sCiAge3JvdXRlOiJMSEUg4oaSIERYQiIsIHJlZ2lvbjoiVUFFIiwgYWlybGluZToiUEEiLCBkZXA6IjExOjAwIEFNIiwgcGtyOjYxNDAwLCAgdXNkOjIyMCwgIGFlZDo4MDcsICBzYXI6ODI0LCAgZ2JwOjE3Mywgc3RvcHM6MCwgdGFnOiJkaXJlY3QifSwKICB7cm91dGU6IklTQiDihpIgRFhCIiwgcmVnaW9uOiJVQUUiLCBhaXJsaW5lOiJFUiIsIGRlcDoiMDI6NDUgUE0iLCBwa3I6Njc4MDAsICB1c2Q6MjQzLCAgYWVkOjg5MSwgIHNhcjo5MTAsICBnYnA6MTkxLCBzdG9wczoxLCB0YWc6IiJ9LAogIHtyb3V0ZToiS0hJIOKGkiBBVUgiLCByZWdpb246IlVBRSIsIGFpcmxpbmU6IlE4IiwgZGVwOiIwNjoyMCBBTSIsIHBrcjo3MjMwMCwgIHVzZDoyNTksICBhZWQ6OTUwLCAgc2FyOjk3MCwgIGdicDoyMDQsIHN0b3BzOjEsIHRhZzoiIn0sCiAge3JvdXRlOiJLSEkg4oaSIEpFRCIsIHJlZ2lvbjoiS1NBIiwgYWlybGluZToiUEEiLCBkZXA6IjAzOjMwIEFNIiwgcGtyOjgzMTAwLCAgdXNkOjI5OCwgIGFlZDoxMDkyLCBzYXI6MTExNSwgZ2JwOjIzNCwgc3RvcHM6MCwgdGFnOiJiZXN0In0sCiAge3JvdXRlOiJMSEUg4oaSIFJVSCIsIHJlZ2lvbjoiS1NBIiwgYWlybGluZToiUEsiLCBkZXA6IjA1OjE1IEFNIiwgcGtyOjg4NDAwLCAgdXNkOjMxNywgIGFlZDoxMTYxLCBzYXI6MTE4NiwgZ2JwOjI0OSwgc3RvcHM6MCwgdGFnOiJkaXJlY3QifSwKICB7cm91dGU6IklTQiDihpIgSkVEIiwgcmVnaW9uOiJLU0EiLCBhaXJsaW5lOiJFUiIsIGRlcDoiMTA6NDUgUE0iLCBwa3I6OTE3MDAsICB1c2Q6MzI5LCAgYWVkOjEyMDQsIHNhcjoxMjMwLCBnYnA6MjU4LCBzdG9wczoxLCB0YWc6IiJ9LAogIHtyb3V0ZToiS0hJIOKGkiBNRUQiLCByZWdpb246IktTQSIsIGFpcmxpbmU6IlE4IiwgZGVwOiIwMTowMCBBTSIsIHBrcjo5NjIwMCwgIHVzZDozNDUsICBhZWQ6MTI2NCwgc2FyOjEyOTEsIGdicDoyNzEsIHN0b3BzOjEsIHRhZzoiIn0sCiAge3JvdXRlOiJLSEkg4oaSIExIUiIsIHJlZ2lvbjoiVUsiLCAgYWlybGluZToiUEsiLCBkZXA6IjA4OjAwIFBNIiwgcGtyOjE0MjAwMCwgdXNkOjUwOSwgIGFlZDoxODY2LCBzYXI6MTkwNywgZ2JwOjQwMSwgc3RvcHM6MCwgdGFnOiJiZXN0In0sCiAge3JvdXRlOiJMSEUg4oaSIExIUiIsIHJlZ2lvbjoiVUsiLCAgYWlybGluZToiUEEiLCBkZXA6IjEwOjMwIFBNIiwgcGtyOjE1NDAwMCwgdXNkOjU1MiwgIGFlZDoyMDI0LCBzYXI6MjA2NywgZ2JwOjQzNCwgc3RvcHM6MSwgdGFnOiIifSwKICB7cm91dGU6IklTQiDihpIgTUFOIiwgcmVnaW9uOiJVSyIsICBhaXJsaW5lOiJQSyIsIGRlcDoiMTE6NTkgUE0iLCBwa3I6MTM4NTAwLCB1c2Q6NDk3LCAgYWVkOjE4MjAsIHNhcjoxODU5LCBnYnA6MzkxLCBzdG9wczowLCB0YWc6ImRpcmVjdCJ9LApdOwpjb25zdCBBSVJMSU5FUyA9IHtQQToiQWlyIEJsdWUiLCBQSzoiUElBIiwgRVI6IkthbSBBaXIiLCBRODoiS3V3YWl0IEFpcncuIn07CmNvbnN0IERPVF9DTEFTUyA9IHtQQToiZG90LXBhIiwgUEs6ImRvdC1wayIsIEVSOiJkb3QtZXIiLCBRODoiZG90LXE4In07CmNvbnN0IFNZTSA9IHtQS1I6IlBLUiAiLCBVU0Q6IiQiLCBBRUQ6IkFFRCAiLCBTQVI6IlNBUiAiLCBHQlA6IsKjIn07CmxldCBjdXIgPSAiUEtSIjsKCmZ1bmN0aW9uIGdldFByaWNlKGYpeyByZXR1cm4gZltjdXIudG9Mb3dlckNhc2UoKV07IH0KZnVuY3Rpb24gZm10KGYpeyByZXR1cm4gU1lNW2N1cl0gKyBnZXRQcmljZShmKS50b0xvY2FsZVN0cmluZygpOyB9CmZ1bmN0aW9uIHByaWNlQ2xhc3MoZil7CiAgY29uc3QgYWxsID0gRkFSRVMubWFwKGdldFByaWNlKSwgbW4gPSBNYXRoLm1pbiguLi5hbGwpLCBteCA9IE1hdGgubWF4KC4uLmFsbCk7CiAgY29uc3QgcCA9IGdldFByaWNlKGYpLCBwY3QgPSAocC1tbikvKG14LW1uKTsKICByZXR1cm4gcGN0IDwgMC4zMyA/ICJwcmljZS1sbyIgOiBwY3QgPCAwLjY2ID8gInByaWNlLW1pZCIgOiAicHJpY2UtaGkiOwp9CmZ1bmN0aW9uIGJhclcoZil7CiAgY29uc3QgYWxsID0gRkFSRVMubWFwKGdldFByaWNlKSwgbW4gPSBNYXRoLm1pbiguLi5hbGwpLCBteCA9IE1hdGgubWF4KC4uLmFsbCk7CiAgcmV0dXJuIE1hdGgucm91bmQoKChnZXRQcmljZShmKS1tbikvKG14LW1uKSkqNzArOCk7Cn0KCmZ1bmN0aW9uIHNldEN1cnJlbmN5KGMsIGJ0bil7CiAgY3VyID0gYzsKICBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCIuY3gtYnRuIikuZm9yRWFjaChiPT5iLmNsYXNzTGlzdC5yZW1vdmUoImFjdGl2ZSIpKTsKICBidG4uY2xhc3NMaXN0LmFkZCgiYWN0aXZlIik7CiAgcmVuZGVyRmFyZVRhYmxlKCk7IHJlbmRlck1hdHJpeCgpOyB1cGRhdGVLUEkoKTsKfQoKZnVuY3Rpb24gdXBkYXRlS1BJKCl7CiAgY29uc3Qgc29ydGVkID0gWy4uLkZBUkVTXS5zb3J0KChhLGIpPT5nZXRQcmljZShhKS1nZXRQcmljZShiKSk7CiAgY29uc3QgYmVzdCA9IHNvcnRlZFswXTsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiYmVzdC1mYXJlIikudGV4dENvbnRlbnQgPSBTWU1bY3VyXSArIGdldFByaWNlKGJlc3QpLnRvTG9jYWxlU3RyaW5nKCk7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoImJlc3Qtcm91dGUiKS50ZXh0Q29udGVudCA9IGJlc3Qucm91dGUgKyAiIMK3ICIgKyBBSVJMSU5FU1tiZXN0LmFpcmxpbmVdOwp9CgpmdW5jdGlvbiByZW5kZXJGYXJlVGFibGUoKXsKICBjb25zdCByZWcgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgicmVnaW9uLWZpbHRlciIpLnZhbHVlOwogIGNvbnN0IGFpciA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJhaXJsaW5lLWZpbHRlciIpLnZhbHVlOwogIGxldCByb3dzID0gRkFSRVMuZmlsdGVyKGY9PihyZWc9PT0iYWxsInx8Zi5yZWdpb249PT1yZWcpJiYoYWlyPT09ImFsbCJ8fGYuYWlybGluZT09PWFpcikpOwogIHJvd3Muc29ydCgoYSxiKT0+Z2V0UHJpY2UoYSktZ2V0UHJpY2UoYikpOwogIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJmYXJlLXRib2R5IikuaW5uZXJIVE1MID0gcm93cy5tYXAoZj0+YAogICAgPHRyPgogICAgICA8dGQgc3R5bGU9ImZvbnQtd2VpZ2h0OjUwMCI+JHtmLnJvdXRlfTwvdGQ+CiAgICAgIDx0ZD48c3BhbiBjbGFzcz0iZG90ICR7RE9UX0NMQVNTW2YuYWlybGluZV19Ij48L3NwYW4+JHtBSVJMSU5FU1tmLmFpcmxpbmVdfSAoJHtmLmFpcmxpbmV9KTwvdGQ+CiAgICAgIDx0ZCBzdHlsZT0iZm9udC1mYW1pbHk6dmFyKC0tbW9ubyk7Zm9udC1zaXplOjExcHgiPiR7Zi5kZXB9PC90ZD4KICAgICAgPHRkPjxkaXYgY2xhc3M9InByaWNlLXdyYXAiPjxkaXYgY2xhc3M9InByaWNlLWJhciIgc3R5bGU9IndpZHRoOiR7YmFyVyhmKX1weCI+PC9kaXY+PHNwYW4gY2xhc3M9IiR7cHJpY2VDbGFzcyhmKX0iPiR7Zm10KGYpfTwvc3Bhbj48L2Rpdj48L3RkPgogICAgICA8dGQgc3R5bGU9InRleHQtYWxpZ246Y2VudGVyO2NvbG9yOnZhcigtLW11dGVkKSI+JHtmLnN0b3BzPT09MD8iTm9uLXN0b3AiOiIxIHN0b3AifTwvdGQ+CiAgICAgIDx0ZD4ke2YudGFnPT09ImJlc3QiPyc8c3BhbiBjbGFzcz0idGFnIHRhZy1iZXN0Ij5CZXN0IGZhcmU8L3NwYW4+JzpmLnRhZz09PSJkaXJlY3QiPyc8c3BhbiBjbGFzcz0idGFnIHRhZy1kaXJlY3QiPkRpcmVjdDwvc3Bhbj4nOicnfTwvdGQ+CiAgICA8L3RyPmApLmpvaW4oIiIpOwp9CgovKiDilIDilIAgTWF0cml4IOKUgOKUgCAqLwpjb25zdCBNQVRfUk9VVEVTID0gWyJLSEkg4oaSIERYQiIsIkxIRSDihpIgRFhCIiwiS0hJIOKGkiBKRUQiLCJJU0Ig4oaSIEpFRCIsIktISSDihpIgTEhSIiwiSVNCIOKGkiBNQU4iXTsKY29uc3QgREFURVMgPSBbIkp1biAxMCIsIkp1biAxMSIsIkp1biAxMiIsIkp1biAxMyIsIkp1biAxNCIsIkp1biAxNSIsIkp1biAxNiJdOwpjb25zdCBtYXREYXRhID0ge307CmZ1bmN0aW9uIGdlbk1hdHJpeCgpewogIE1BVF9ST1VURVMuZm9yRWFjaChyPT57CiAgICBjb25zdCBiYXNlID0gRkFSRVMuZmluZChmPT5mLnJvdXRlPT09cik7CiAgICBpZighYmFzZSkgcmV0dXJuOwogICAgREFURVMuZm9yRWFjaChkPT57CiAgICAgIGNvbnN0IG0gPSAwLjg4ICsgTWF0aC5yYW5kb20oKSowLjI4OwogICAgICBtYXREYXRhW3IrZF0gPSB7cGtyOk1hdGgucm91bmQoYmFzZS5wa3IqbS8xMDApKjEwMCwgdXNkOk1hdGgucm91bmQoYmFzZS51c2QqbSksIGFlZDpNYXRoLnJvdW5kKGJhc2UuYWVkKm0pLCBzYXI6TWF0aC5yb3VuZChiYXNlLnNhciptKSwgZ2JwOk1hdGgucm91bmQoYmFzZS5nYnAqbSl9OwogICAgfSk7CiAgfSk7Cn0KZnVuY3Rpb24gcmVuZGVyTWF0cml4KCl7CiAgY29uc3Qga2V5ID0gY3VyLnRvTG93ZXJDYXNlKCk7CiAgY29uc3QgYWxsID0gT2JqZWN0LnZhbHVlcyhtYXREYXRhKS5tYXAodj0+dltrZXldKTsKICBjb25zdCBtbiA9IE1hdGgubWluKC4uLmFsbCksIG14ID0gTWF0aC5tYXgoLi4uYWxsKTsKICBsZXQgaHRtbCA9ICI8dGhlYWQ+PHRyPjx0aD5Sb3V0ZTwvdGg+IiArIERBVEVTLm1hcChkPT5gPHRoPiR7ZH08L3RoPmApLmpvaW4oIiIpICsgIjwvdHI+PC90aGVhZD48dGJvZHk+IjsKICBNQVRfUk9VVEVTLmZvckVhY2gocj0+ewogICAgaHRtbCArPSBgPHRyPjx0ZCBjbGFzcz0icm91dGUtbGFiZWwiPiR7cn08L3RkPmA7CiAgICBEQVRFUy5mb3JFYWNoKGQ9PnsKICAgICAgY29uc3QgdiA9IG1hdERhdGFbcitkXT8uW2tleV07CiAgICAgIGlmKCF2KXtodG1sKz1gPHRkPuKAlDwvdGQ+YDtyZXR1cm47fQogICAgICBjb25zdCBwY3QgPSAodi1tbikvKG14LW1uKTsKICAgICAgY29uc3QgY2xzID0gcGN0PDAuMzM/ImNlbGwtbG8iOnBjdDwwLjY2PyJjZWxsLW1pZCI6ImNlbGwtaGkiOwogICAgICBodG1sICs9IGA8dGQgY2xhc3M9IiR7Y2xzfSI+JHtTWU1bY3VyXX0ke3YudG9Mb2NhbGVTdHJpbmcoKX08L3RkPmA7CiAgICB9KTsKICAgIGh0bWwgKz0gIjwvdHI+IjsKICB9KTsKICBodG1sICs9ICI8L3Rib2R5PiI7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoIm1hdHJpeC10YWJsZSIpLmlubmVySFRNTCA9IGh0bWw7Cn0KCi8qIOKUgOKUgCBTY3JhcGVyIHNpbSDilIDilIAgKi8KY29uc3QgU0VDVE9SUyA9IFsKICAiS0hJIOKGkiBMSEUiLCJMSEUg4oaSIEtISSIsIklTQiDihpIgS0hJIiwiS0hJIOKGkiBJU0IiLAogICJJU0Ig4oaSIEtEVSIsIktEVSDihpIgSVNCIiwiTEhFIOKGkiBLRFUiLCJLRFUg4oaSIExIRSIsCiAgIktISSDihpIgRFhCIiwiTEhFIOKGkiBEWEIiLCJLSEkg4oaSIEpFRCIsIklTQiDihpIgTUFOIgpdOwpjb25zdCBQUklDRVNfU0lNID0gWyJQS1IgMTEsNDAwIiwiUEtSIDEyLDgwMCIsIlBLUiA5LDUwMCIsIlBLUiAxMCwyMDAiLCJQS1IgMTgsMzAwIiwiUEtSIDE3LDEwMCIsIlBLUiAxNiw0MDAiLCJQS1IgMTUsOTAwIiwiUEtSIDU0LDIwMCIsIlBLUiA2MSw0MDAiLCJQS1IgODMsMTAwIiwiUEtSIDEzOCw1MDAiXTsKY29uc3QgVElNRVNfU0lNICA9IFsiMDc6MzAgQU0iLCIwOToxNSBBTSIsIjExOjAwIEFNIiwiMDI6NDUgUE0iLCIwNjoyMCBBTSIsIjAzOjMwIEFNIiwiMDU6MTUgQU0iLCIxMDo0NSBQTSIsIjA4OjAwIFBNIiwiMTA6MzAgUE0iLCIwMTowMCBBTSIsIjExOjU5IFBNIl07CgpsZXQgc2ltU3RhdGUgPSBbXTsKbGV0IHNpbVJ1bm5pbmcgPSBmYWxzZTsKbGV0IGxvZ0xpbmVzID0gW107CgpmdW5jdGlvbiBpbml0U2ltKCl7CiAgc2ltU3RhdGUgPSBTRUNUT1JTLm1hcChzPT4oe3NlY3RvcjpzLCBzdGF0dXM6IndhaXRpbmciLCBwcmljZToiIiwgdGltZToiIn0pKTsKICByZW5kZXJTaW0oKTsKfQpmdW5jdGlvbiByZW5kZXJTaW0oKXsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgic2NyYXBlci1ncmlkIikuaW5uZXJIVE1MID0gc2ltU3RhdGUubWFwKHM9PmAKICAgIDxkaXYgY2xhc3M9InNpbS1yb3ciPgogICAgICA8c3BhbiBjbGFzcz0ic2ltLXNlY3RvciI+JHtzLnNlY3Rvcn08L3NwYW4+CiAgICAgIDxzcGFuIGNsYXNzPSJzaW0tcHJpY2UiPiR7cy5wcmljZT9zLnByaWNlKyIgQCAiK3MudGltZToiIn08L3NwYW4+CiAgICAgIDxzcGFuIGNsYXNzPSJzaW0tYmFkZ2UgJHtzLnN0YXR1cz09PSJkb25lIj8iYmFkZ2UtZG9uZSI6cy5zdGF0dXM9PT0icnVubmluZyI/ImJhZGdlLXJ1biI6ImJhZGdlLXdhaXQifSI+CiAgICAgICAgJHtzLnN0YXR1cz09PSJkb25lIj8i4pyTIGRvbmUiOnMuc3RhdHVzPT09InJ1bm5pbmciPyJzY2FubmluZ+KApiI6IndhaXRpbmcifQogICAgICA8L3NwYW4+CiAgICA8L2Rpdj5gKS5qb2luKCIiKTsKfQpmdW5jdGlvbiBsb2codHh0LCBjbHM9IiIpewogIGNvbnN0IHNwYW4gPSBjbHMgPyBgPHNwYW4gY2xhc3M9IiR7Y2xzfSI+JHt0eHR9PC9zcGFuPmAgOiB0eHQ7CiAgbG9nTGluZXMucHVzaChzcGFuKTsKICBjb25zdCBsYiA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJsb2ctYm94Iik7CiAgbGIuaW5uZXJIVE1MID0gbG9nTGluZXMuam9pbigiPGJyPiIpOwogIGxiLnNjcm9sbFRvcCA9IGxiLnNjcm9sbEhlaWdodDsKfQpmdW5jdGlvbiBzbGVlcChtcyl7IHJldHVybiBuZXcgUHJvbWlzZShyPT5zZXRUaW1lb3V0KHIsbXMpKTsgfQoKYXN5bmMgZnVuY3Rpb24gcnVuU2NyYXBlcigpewogIGlmKHNpbVJ1bm5pbmcpIHJldHVybjsKICBzaW1SdW5uaW5nID0gdHJ1ZTsKICBsb2dMaW5lcyA9IFtdOwogIGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJydW4tYnRuIikuZGlzYWJsZWQgPSB0cnVlOwogIGluaXRTaW0oKTsKICBjb25zdCB0b21vcnJvdyA9IG5ldyBEYXRlKERhdGUubm93KCkrODY0MDAwMDApLnRvSVNPU3RyaW5nKCkuc2xpY2UoMCwxMCk7CiAgbG9nKCLilZAiLnJlcGVhdCg1MiksICJsb2ctZyIpOwogIGxvZygiICBEYWlseSBGbGlnaHQgU2NyYXBlciDihpIgR29vZ2xlIFNoZWV0cyIsICJsb2ctdyIpOwogIGxvZygi4pWQIi5yZXBlYXQoNTIpLCAibG9nLWciKTsKICBsb2coYCAgRGF0ZSAgICA6ICR7dG9tb3Jyb3d9ICh0b21vcnJvdylgLCAibG9nLWIiKTsKICBsb2coYCAgU2VjdG9ycyA6ICR7U0VDVE9SUy5sZW5ndGh9IChkb21lc3RpYyArIGludGVybmF0aW9uYWwpYCwgImxvZy1iIik7CiAgbG9nKGAgIEN1cnJlbmN5OiBQS1JgLCAibG9nLWIiKTsKICBsb2coIiAgQ29uZmlnICA6IENPTkZJR18xMEFNIiwgImxvZy1iIik7CiAgbG9nKCLilZAiLnJlcGVhdCg1MiksICJsb2ctZyIpOwogIGxvZygiIik7CiAgZm9yKGxldCBpPTA7aTxzaW1TdGF0ZS5sZW5ndGg7aSsrKXsKICAgIHNpbVN0YXRlW2ldLnN0YXR1cz0icnVubmluZyI7CiAgICByZW5kZXJTaW0oKTsKICAgIGxvZyhg4pyIICBbJHtpKzF9LyR7c2ltU3RhdGUubGVuZ3RofV0gJHtzaW1TdGF0ZVtpXS5zZWN0b3J9YCk7CiAgICBhd2FpdCBzbGVlcCgyODApOwogICAgbG9nKGAgICDij7MgV2FpdGluZyBmb3IgcmVzdWx0cyAoc3RhbGxAMTIwcyA9IHJlc3RhcnQpLi4uYCwgImxvZy1nIik7CiAgICBhd2FpdCBzbGVlcCgzNTAgKyBNYXRoLnJhbmRvbSgpKjUwMCk7CiAgICBjb25zdCBuID0gTWF0aC5mbG9vcig4K01hdGgucmFuZG9tKCkqMjApOwogICAgbG9nKGAgICDwn5OmICR7bn0gZmxpZ2h0cyAvIDIgYmF0Y2goZXMpLi4uYCwgImxvZy1nIik7CiAgICBhd2FpdCBzbGVlcCgxODApOwogICAgbG9nKGAgICDinIUgU3RhYmxlIOKAlCAke259IGZsaWdodHMgY2FwdHVyZWQuYCk7CiAgICBzaW1TdGF0ZVtpXS5zdGF0dXM9ImRvbmUiOwogICAgc2ltU3RhdGVbaV0ucHJpY2UgPSBQUklDRVNfU0lNW2ldOwogICAgc2ltU3RhdGVbaV0udGltZSA9IFRJTUVTX1NJTVtpXTsKICAgIHJlbmRlclNpbSgpOwogICAgbG9nKGAgICDihpIgJHtzaW1TdGF0ZVtpXS5zZWN0b3J9ICAke1BSSUNFU19TSU1baV19IEAgJHtUSU1FU19TSU1baV19YCwgImxvZy15Iik7CiAgICBpZihpIDwgc2ltU3RhdGUubGVuZ3RoLTEpeyBhd2FpdCBzbGVlcCgxODApOyBsb2coYCAgIPCfkqQgU2xlZXBpbmcgJHsyMCtNYXRoLmZsb29yKE1hdGgucmFuZG9tKCkqMjApfXMgYmV0d2VlbiBzZWN0b3JzLi4uYCwgImxvZy1nIik7IH0KICB9CiAgbG9nKCIiKTsKICBsb2coYPCfk4sgUHVzaGluZyAke3NpbVN0YXRlLmxlbmd0aH0gZmxpZ2h0cyB0byBTaGVldHMgdGFiICdKdW4tMTAnLi4uYCwgImxvZy13Iik7CiAgYXdhaXQgc2xlZXAoNzAwKTsKICBsb2coYCAgIOKchSAke3NpbVN0YXRlLmxlbmd0aCAqIDJ9IGNlbGxzIHVwZGF0ZWQgKGZhcmUgKyB0aW1lIHBlciBmbGlnaHQpLmApOwogIGxvZyhgICAg4pyFIFRpbWVzdGFtcCBjZWxscyBNMjQgKyBRMjQgdXBkYXRlZC5gKTsKICBsb2coIvCfj4EgQWxsIGRvbmUhIiwgImxvZy13Iik7CiAgZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoInJ1bi1idG4iKS5kaXNhYmxlZCA9IGZhbHNlOwogIHNpbVJ1bm5pbmcgPSBmYWxzZTsKfQoKLyog4pSA4pSAIFRhYnMg4pSA4pSAICovCmZ1bmN0aW9uIHNob3dUYWIoaWQsIGJ0bil7CiAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgiLnBhbmVsIikuZm9yRWFjaChwPT5wLmNsYXNzTGlzdC5yZW1vdmUoImFjdGl2ZSIpKTsKICBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCIudGFiIikuZm9yRWFjaCh0PT50LmNsYXNzTGlzdC5yZW1vdmUoImFjdGl2ZSIpKTsKICBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgicGFuZWwtIitpZCkuY2xhc3NMaXN0LmFkZCgiYWN0aXZlIik7CiAgYnRuLmNsYXNzTGlzdC5hZGQoImFjdGl2ZSIpOwp9CgovKiDilIDilIAgSW5pdCDilIDilIAgKi8KZ2VuTWF0cml4KCk7CnJlbmRlckZhcmVUYWJsZSgpOwpyZW5kZXJNYXRyaXgoKTsKdXBkYXRlS1BJKCk7CmluaXRTaW0oKTsKPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1sPgo=";
+let _skysyncLoaded = false;
+function loadSkySync() {
+  if (_skysyncLoaded) return;
+  _skysyncLoaded = true;
+  const html = atob(_SKYSYNC_B64);
+  const blob = new Blob([html], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('skysync-frame').src = url;
 }
 
-function setCurrency(c, btn){
-  cur = c;
-  document.querySelectorAll(".cx-btn").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  renderFareTable(); renderMatrix(); updateKPI();
+// ============ WINDOW MANAGER ============
+const WINS={about:{title:'About Hamza',icon:'🖥️'},projects:{title:'Projects',icon:'📁'},skills:{title:'Skills.exe',icon:'⚙️'},cv:{title:'Resume.doc',icon:'📄'},contact:{title:'Contact',icon:'✉️'},ie:{title:'Internet Explorer',icon:'🌐'},skysync:{title:'SkySync Pro',icon:'✈️'},solitaire:{title:'Solitaire',icon:'🃏'}};
+const ST={};for(const k in WINS)ST[k]={open:false,min:false,max:false,prev:null};
+let Z=200,startOpen=false;
+function g(id){return document.getElementById(id);}
+function focusWin(id){
+  Z++;
+  const w=g('win-'+id);
+  w.style.zIndex=Z;
+  w.style.display='flex';
+  for(const k in WINS)g('title-'+k).classList.remove('active-title');
+  g('title-'+id).classList.add('active-title');
+}
+function openWin(id){
+  const w=g('win-'+id);
+  ST[id].open=true;ST[id].min=false;
+  w.classList.add('open');
+  focusWin(id);updateTB();
+  if(startOpen)toggleStart();
+}
+function closeWin(id){
+  const w=g('win-'+id);
+  w.classList.remove('open');
+  w.style.display='none';
+  ST[id].open=false;ST[id].min=false;
+  if(id==='solitaire')solStopTimer();
+  updateTB();
+}
+function minWin(id){
+  g('win-'+id).style.display='none';
+  ST[id].min=true;
+  if(id==='solitaire')solStopTimer();
+  updateTB();
+}
+function maxWin(id){
+  const w=g('win-'+id),s=ST[id];
+  if(!s.max){s.prev={l:w.style.left,t:w.style.top,W:w.style.width,H:w.style.height};w.style.cssText+=';left:0;top:0;width:'+window.innerWidth+'px;height:'+(window.innerHeight-28)+'px';s.max=true;}
+  else{if(s.prev){w.style.left=s.prev.l;w.style.top=s.prev.t;w.style.width=s.prev.W;w.style.height=s.prev.H;}s.max=false;}
+}
+function updateTB(){
+  const c=g('taskbar-btns');c.innerHTML='';
+  for(const id in WINS){
+    if(!ST[id].open)continue;
+    const b=document.createElement('div');
+    b.className='taskbar-btn'+(ST[id].min?'':' active');
+    b.textContent=WINS[id].icon+' '+WINS[id].title;
+    b.onclick=()=>{if(ST[id].min){openWin(id);}else{minWin(id);}};
+    c.appendChild(b);
+  }
+}
+function toggleStart(){
+  startOpen=!startOpen;
+  g('startMenu').classList.toggle('open',startOpen);
+  g('startBtn').classList.toggle('active',startOpen);
+}
+document.addEventListener('click',e=>{if(startOpen&&!e.target.closest('#startMenu')&&!e.target.closest('#startBtn'))toggleStart();});
+function makeDrag(id){
+  const tb=g('title-'+id),w=g('win-'+id);
+  let mx=0,my=0,ox=0,oy=0,dr=false;
+  tb.addEventListener('mousedown',e=>{
+    if(ST[id].max)return;
+    if(e.target.tagName==='BUTTON'||e.target.closest('button'))return;
+    dr=true;mx=e.clientX;my=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;focusWin(id);e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{if(!dr)return;w.style.left=Math.max(0,ox+(e.clientX-mx))+'px';w.style.top=Math.max(0,Math.min(window.innerHeight-48,oy+(e.clientY-my)))+'px';});
+  document.addEventListener('mouseup',()=>{dr=false;});
+  w.addEventListener('mousedown',e=>{if(!e.target.tagName==='BUTTON'&&!e.target.closest('button'))focusWin(id);});
+}
+function makeResize(id){
+  const h=g('resize-'+id),w=g('win-'+id);
+  if(!h)return;
+  let rs=false,sx=0,sy=0,sw=0,sh=0;
+  h.addEventListener('mousedown',e=>{rs=true;sx=e.clientX;sy=e.clientY;sw=w.offsetWidth;sh=w.offsetHeight;e.preventDefault();e.stopPropagation();});
+  document.addEventListener('mousemove',e=>{if(!rs)return;w.style.width=Math.max(260,sw+(e.clientX-sx))+'px';w.style.height=Math.max(150,sh+(e.clientY-sy))+'px';});
+  document.addEventListener('mouseup',()=>{rs=false;});
+}
+for(const id in WINS){makeDrag(id);makeResize(id);}
+
+// Clock
+function tick(){const n=new Date(),h=n.getHours(),m=n.getMinutes(),ap=h>=12?'PM':'AM',hh=h%12||12;g('clock').textContent=hh+':'+(m<10?'0':'')+m+' '+ap;}
+tick();setInterval(tick,10000);
+
+// Dialog
+function showMsg(t,icon='⚠️'){g('dlgIcon').textContent=icon;g('dlgText').innerHTML=t;g('dlgOverlay').classList.add('open');}
+function closeDialog(){g('dlgOverlay').classList.remove('open');}
+
+// Icon selection
+function selIcon(el){document.querySelectorAll('.icon').forEach(i=>i.classList.remove('selected'));el.classList.add('selected');}
+g('desktop').addEventListener('click',e=>{if(!e.target.closest('.icon'))document.querySelectorAll('.icon').forEach(i=>i.classList.remove('selected'));});
+
+// Auto-open on load
+openWin('ie');
+setTimeout(()=>openWin('about'),200);
+// Auto-start solitaire game when window opens
+const _openWin = openWin;
+openWin = function(id){
+  _openWin(id);
+  if(id==='solitaire' && !solGameActive){ setTimeout(()=>{ if(!solGameActive)solNewGame(); }, 100); }
+  if(id==='skysync'){ setTimeout(loadSkySync, 50); }
+};
+
+// ============ SOLITAIRE ENGINE ============
+const SUIT_HTML={H:'&#9829;',D:'&#9830;',C:'&#9827;',S:'&#9824;'};
+const SUIT_COLORS={H:'red',D:'red',C:'black',S:'black'};
+const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const FOUND_SUITS=['D','H','S','C'];
+let solDeck=[],solWaste=[],solFoundations=[[],[],[],[]],solTableaus=[[],[],[],[],[],[],[]];;
+let solSelected=null; // {from:'waste'|'tableau', colIdx?, cardIdx?}
+let solMoves=0,solScore=0,solTimeElapsed=0,solTimer=null;
+let solHistory=[];
+let solGameActive=false;
+const FD_OFFSET=18; // px per face-down card
+const FU_OFFSET=24; // px per face-up card
+
+function solCreateDeck(){
+  const deck=[];
+  for(const suit of FOUND_SUITS)for(let r=0;r<13;r++)deck.push({suit,value:r+1,faceUp:false});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  return deck;
+}
+function solIsRed(s){return SUIT_COLORS[s]==='red';}
+function solRank(v){return RANKS[v-1];}
+function solSuit(s){return SUIT_HTML[s];}
+
+function solMakeCard(card, extraClass=''){
+  const div=document.createElement('div');
+  const col=solIsRed(card.suit)?'red':'black';
+  div.className='sol-card '+(card.faceUp?col:'face-down')+' '+extraClass;
+  if(card.faceUp){
+    div.innerHTML=
+      '<div class="sol-corner sol-corner-tl"><span class="sol-corner-rank">'+solRank(card.value)+'</span><span class="sol-corner-suit">'+solSuit(card.suit)+'</span></div>'+
+      '<div class="sol-center-suit">'+solSuit(card.suit)+'</div>'+
+      '<div class="sol-corner sol-corner-br"><span class="sol-corner-rank">'+solRank(card.value)+'</span><span class="sol-corner-suit">'+solSuit(card.suit)+'</span></div>';
+  }
+  return div;
 }
 
-function updateKPI(){
-  const sorted = [...FARES].sort((a,b)=>getPrice(a)-getPrice(b));
-  const best = sorted[0];
-  const bestFareEl = document.getElementById("best-fare");
-  const bestRouteEl = document.getElementById("best-route");
-
-  // Add updating animation
-  bestFareEl.classList.add('updating');
-  bestRouteEl.classList.add('updating');
-
-  bestFareEl.textContent = SYM[cur] + getPrice(best).toLocaleString();
-  bestRouteEl.textContent = best.route + " · " + AIRLINES[best.airline];
-
-  // Remove animation after it completes
-  setTimeout(() => {
-    bestFareEl.classList.remove('updating');
-    bestRouteEl.classList.remove('updating');
-  }, 600);
+function solNewGame(){
+  if(solGameActive&&solMoves>0&&!confirm('Start new game?'))return;
+  solStopTimer();
+  solDeck=solCreateDeck();
+  solWaste=[];
+  solFoundations=[[],[],[],[]];
+  solTableaus=[[],[],[],[],[],[],[]];
+  solMoves=0;solScore=0;solTimeElapsed=0;
+  solHistory=[];solSelected=null;
+  let ci=0;
+  for(let col=0;col<7;col++){
+    for(let row=0;row<=col;row++){
+      const c=solDeck[ci++];
+      c.faceUp=(row===col);
+      solTableaus[col].push(c);
+    }
+  }
+  solGameActive=true;
+  solStartTimer();
+  solRender();
+  solUpdateStats();
+  solUpdateMsg('');
 }
 
-function renderFareTable(){
-  const reg = document.getElementById("region-filter").value;
-  const air = document.getElementById("airline-filter").value;
-  let rows = FARES.filter(f=>(reg==="all"||f.region===reg)&&(air==="all"||f.airline===air));
-  rows.sort((a,b)=>getPrice(a)-getPrice(b));
+function solDrawCard(){
+  if(!solGameActive)return;
+  solPushHistory();
+  solSelected=null;
+  if(solDeck.length===0){
+    if(solWaste.length===0)return;
+    solDeck=solWaste.slice().reverse().map(c=>({...c,faceUp:false}));
+    solWaste=[];
+    solScore=Math.max(0,solScore-100);
+  } else {
+    const c=solDeck.pop();c.faceUp=true;
+    solWaste.push(c);
+    solMoves++;
+    solScore+=5;
+  }
+  solRender();solUpdateStats();
+}
 
-  const tbody = document.getElementById("fare-tbody");
+function solOnWasteClick(){
+  if(!solGameActive||solWaste.length===0)return;
+  if(solSelected&&solSelected.from==='waste'){solSelected=null;solRender();return;}
+  solSelected={from:'waste'};
+  solRender();
+}
 
-  // Add fade-in animation to rows
-  tbody.innerHTML = rows.map((f, index)=>`
-    <tr style="animation-delay: ${index * 50}ms">
-      <td style="font-weight:500">${f.route}</td>
-      <td><span class="dot ${DOT_CLASS[f.airline]}"></span>${AIRLINES[f.airline]} (${f.airline})</td>
-      <td style="font-family:var(--mono);font-size:0.875rem">${f.dep}</td>
-      <td><div class="price-wrap"><div class="price-bar" style="width:${barW(f)}px"></div><span class="${priceClass(f)}">${fmt(f)}</span></div></td>
-      <td style="text-align:center;color:var(--muted)">${f.stops===0?"Non-stop":"1 stop"}</td>
-      <td>${f.tag==="best"?'<span class="tag tag-best">Best fare</span>':f.tag==="direct"?'<span class="tag tag-direct">Direct</span>':''}</td>
-    </tr>`).join("");
+function solCanStackOnTableau(card,col){
+  if(col.length===0)return card.value===13; // Only King on empty
+  const top=col[col.length-1];
+  if(!top.faceUp)return false;
+  return solIsRed(card.suit)!==solIsRed(top.suit)&&card.value===top.value-1;
+}
 
-  // Add CSS for animation
-  if (!document.querySelector('style#fade-in-rows')) {
-    const style = document.createElement('style');
-    style.id = 'fade-in-rows';
-    style.textContent = `
-      #fare-tbody tr {
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeInUp 0.4s ease-out forwards;
+function solCanStackOnFound(card,fi){
+  const f=solFoundations[fi];
+  if(!f.length)return card.value===1&&card.suit===FOUND_SUITS[fi];
+  return card.suit===f[f.length-1].suit&&card.value===f[f.length-1].value+1;
+}
+
+function solTryFoundation(card){
+  for(let fi=0;fi<4;fi++){
+    if(solCanStackOnFound(card,fi))return fi;
+  }
+  return -1;
+}
+
+function solClickTableau(colIdx,cardIdx,e){
+  if(!solGameActive)return;
+  const col=solTableaus[colIdx];
+  const card=col[cardIdx];
+  if(!card)return;
+
+  // Flip face-down top card
+  if(!card.faceUp){
+    if(cardIdx===col.length-1){
+      solPushHistory();
+      card.faceUp=true;
+      solMoves++;solScore+=5;
+      solSelected=null;solRender();solUpdateStats();
+    }
+    return;
+  }
+
+  // Double-click: send to foundation
+  if(e.detail>=2&&cardIdx===col.length-1){
+    const fi=solTryFoundation(card);
+    if(fi>=0){
+      solPushHistory();
+      solFoundations[fi].push(col.splice(cardIdx,1)[0]);
+      solFlipTop(colIdx);
+      solMoves++;solScore+=15;
+      solSelected=null;solRender();solUpdateStats();solCheckWin();
+    }
+    return;
+  }
+
+  // If something is selected, try to move here
+  if(solSelected){
+    let moved=false;
+    if(solSelected.from==='tableau'&&solSelected.colIdx!==colIdx){
+      const srcCol=solTableaus[solSelected.colIdx];
+      const movingCard=srcCol[solSelected.cardIdx];
+      if(movingCard&&solCanStackOnTableau(movingCard,col)){
+        solPushHistory();
+        const cards=srcCol.splice(solSelected.cardIdx);
+        col.push(...cards);
+        solFlipTop(solSelected.colIdx);
+        solMoves++;solScore+=5;
+        solSelected=null;solRender();solUpdateStats();
+        moved=true;
       }
-
-      @keyframes fadeInUp {
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
+    } else if(solSelected.from==='waste'){
+      const wCard=solWaste[solWaste.length-1];
+      if(wCard&&solCanStackOnTableau(wCard,col)){
+        solPushHistory();
+        col.push(solWaste.pop());
+        solMoves++;solScore+=5;
+        solSelected=null;solRender();solUpdateStats();
+        moved=true;
       }
-    `;
-    document.head.appendChild(style);
+    }
+    if(!moved){
+      // Re-select this card instead
+      solSelected={from:'tableau',colIdx,cardIdx};
+      solRender();
+    }
+    return;
+  }
+
+  // Select this card
+  solSelected={from:'tableau',colIdx,cardIdx};
+  solRender();
+}
+
+function solClickEmptyCol(colIdx){
+  if(!solGameActive||!solSelected)return;
+  const col=solTableaus[colIdx];
+  if(col.length>0)return; // not empty anymore
+  if(solSelected.from==='tableau'){
+    const srcCol=solTableaus[solSelected.colIdx];
+    const movingCard=srcCol[solSelected.cardIdx];
+    if(movingCard&&movingCard.value===13){
+      solPushHistory();
+      const cards=srcCol.splice(solSelected.cardIdx);
+      col.push(...cards);
+      solFlipTop(solSelected.colIdx);
+      solMoves++;solScore+=5;
+      solSelected=null;solRender();solUpdateStats();
+    }
+  } else if(solSelected.from==='waste'){
+    const wCard=solWaste[solWaste.length-1];
+    if(wCard&&wCard.value===13){
+      solPushHistory();
+      col.push(solWaste.pop());
+      solMoves++;solScore+=5;
+      solSelected=null;solRender();solUpdateStats();
+    }
   }
 }
 
-/* ── Matrix ── */
-const MAT_ROUTES = ["KHI → DXB","LHE → DXB","KHI → JED","ISB → JED","KHI → LHR","ISB → MAN"];
-const DATES = ["Jun 10","Jun 11","Jun 12","Jun 13","Jun 14","Jun 15","Jun 16"];
-const matData = {};
-function genMatrix(){
-  MAT_ROUTES.forEach(r=>{
-    const base = FARES.find(f=>f.route===r);
-    if(!base) return;
-    DATES.forEach(d=>{
-      const m = 0.88 + Math.random()*0.28;
-      matData[r+d] = {pkr:Math.round(base.pkr*m/100)*100, usd:Math.round(base.usd*m), aed:Math.round(base.aed*m), sar:Math.round(base.sar*m), gbp:Math.round(base.gbp*m)};
-    });
+function solClickFoundation(fi){
+  if(!solGameActive)return;
+  if(!solSelected)return;
+  let card=null;
+  if(solSelected.from==='tableau'){
+    const col=solTableaus[solSelected.colIdx];
+    // Only move single top card to foundation
+    if(solSelected.cardIdx!==col.length-1)return;
+    card=col[solSelected.cardIdx];
+  } else if(solSelected.from==='waste'){
+    card=solWaste[solWaste.length-1];
+  }
+  if(card&&solCanStackOnFound(card,fi)){
+    solPushHistory();
+    if(solSelected.from==='tableau'){
+      solTableaus[solSelected.colIdx].splice(solSelected.cardIdx,1);
+      solFlipTop(solSelected.colIdx);
+    } else {
+      solWaste.pop();
+    }
+    solFoundations[fi].push(card);
+    solMoves++;solScore+=15;
+    solSelected=null;solRender();solUpdateStats();solCheckWin();
+  } else {
+    solSelected=null;solRender();
+  }
+}
+
+function solFlipTop(colIdx){
+  const col=solTableaus[colIdx];
+  if(col.length>0&&!col[col.length-1].faceUp){col[col.length-1].faceUp=true;solScore+=5;}
+}
+
+function solAutoComplete(){
+  if(!solGameActive)return;
+  // All cards must be face-up first
+  let allFaceUp=solTableaus.every(col=>col.every(c=>c.faceUp))&&solWaste.every(c=>c.faceUp)&&solDeck.length===0;
+  if(!allFaceUp){solUpdateMsg('Flip all cards before auto-completing');return;}
+  let moved=true;
+  while(moved){moved=false;
+    for(let fi=0;fi<4;fi++){
+      const f=solFoundations[fi];
+      const needVal=f.length===0?1:f[f.length-1].value+1;
+      const needSuit=FOUND_SUITS[fi];
+      // Try waste
+      if(solWaste.length){
+        const c=solWaste[solWaste.length-1];
+        if(c.value===needVal&&c.suit===needSuit){solFoundations[fi].push(solWaste.pop());solScore+=15;solMoves++;moved=true;continue;}
+      }
+      // Try tableaus
+      for(let ti=0;ti<7;ti++){
+        const col=solTableaus[ti];
+        if(!col.length)continue;
+        const c=col[col.length-1];
+        if(c.faceUp&&c.value===needVal&&c.suit===needSuit){
+          solFoundations[fi].push(col.pop());solScore+=15;solMoves++;moved=true;break;
+        }
+      }
+    }
+  }
+  solRender();solUpdateStats();solCheckWin();
+}
+
+function solHint(){
+  if(!solGameActive)return;
+  // Check waste top
+  if(solWaste.length){
+    const c=solWaste[solWaste.length-1];
+    const fi=solTryFoundation(c);
+    if(fi>=0){solUpdateMsg('Hint: send '+solRank(c.value)+' '+solSuit(c.suit)+' to foundation');return;}
+    for(let ti=0;ti<7;ti++){
+      if(solCanStackOnTableau(c,solTableaus[ti])){solUpdateMsg('Hint: move '+solRank(c.value)+' '+solSuit(c.suit)+' from waste to column '+(ti+1));return;}
+    }
+  }
+  // Check tableau tops
+  for(let ti=0;ti<7;ti++){
+    const col=solTableaus[ti];
+    if(!col.length)continue;
+    const c=col[col.length-1];
+    if(!c.faceUp)continue;
+    const fi=solTryFoundation(c);
+    if(fi>=0){solUpdateMsg('Hint: send '+solRank(c.value)+' '+solSuit(c.suit)+' to foundation');return;}
+    for(let di=0;di<7;di++){
+      if(di===ti)continue;
+      if(solCanStackOnTableau(c,solTableaus[di])){solUpdateMsg('Hint: move '+solRank(c.value)+' '+solSuit(c.suit)+' to column '+(di+1));return;}
+    }
+  }
+  solUpdateMsg('Hint: draw from deck');
+}
+
+function solPushHistory(){
+  solHistory.push({
+    waste:solWaste.map(c=>({...c})),
+    found:solFoundations.map(f=>f.map(c=>({...c}))),
+    tabs:solTableaus.map(t=>t.map(c=>({...c}))),
+    deck:solDeck.map(c=>({...c})),
+    moves:solMoves,score:solScore
   });
-}
-function renderMatrix(){
-  const key = cur.toLowerCase();
-  const all = Object.values(matData).map(v=>v[key]);
-  const mn = Math.min(...all), mx = Math.max(...all);
-  let html = "<thead><tr><th>Route</th>" + DATES.map(d=>`<th>${d}</th>`).join("") + "</tr></thead><tbody>";
-  MAT_ROUTES.forEach((r, rowIndex)=> {
-    html += `<tr style="animation-delay: ${rowIndex * 50}ms"><td class="route-label">${r}</td>`;
-    DATES.forEach((d, colIndex)=> {
-      const v = matData[r+d]?.[key];
-      if(!v){html+=`<td>—</td>`;return;}
-      const pct = (v-mn)/(mx-mn);
-      const cls = pct<0.33?"cell-lo":pct<0.66?"cell-mid":"cell-hi";
-      html += `<td class="${cls}" style="animation-delay: ${colIndex * 20}ms">${SYM[cur]}${v.toLocaleString()}</td>`;
-    });
-    html += "</tr>";
-  });
-  html += "</tbody>";
-  document.getElementById("matrix-table").innerHTML = html;
+  if(solHistory.length>50)solHistory.shift();
 }
 
-/* ── Scraper sim ── */
-const SECTORS = [
-  "KHI → LHE","LHE → KHI","ISB → KHI","KHI → ISB",
-  "ISB → KDU","KDU → ISB","LHE → KDU","KDU → LHE",
-  "KHI → DXB","LHE → DXB","KHI → JED","ISB → MAN"
-];
-const PRICES_SIM = ["PKR 11,400","PKR 12,800","PKR 9,500","PKR 10,200","PKR 18,300","PKR 17,100","PKR 16,400","PKR 15,900","PKR 54,200","PKR 61,400","PKR 83,100","PKR 138,500"];
-const TIMES_SIM  = ["07:30 AM","09:15 AM","11:00 AM","02:45 PM","06:20 AM","03:30 AM","05:15 AM","10:45 PM","08:00 PM","10:30 PM","01:00 AM","11:59 PM"];
-
-let simState = [];
-let simRunning = false;
-let logLines = [];
-
-function initSim(){
-  simState = SECTORS.map(s=>({sector:s, status:"waiting", price:"", time:""}));
-  renderSim();
+function solUndo(){
+  if(!solHistory.length)return;
+  const s=solHistory.pop();
+  solWaste=s.waste;solFoundations=s.found;solTableaus=s.tabs;solDeck=s.deck;
+  solMoves=s.moves;solScore=s.score;
+  solSelected=null;solRender();solUpdateStats();
 }
-function renderSim(){
-  document.getElementById("scraper-grid").innerHTML = simState.map(s=>`
-    <div class="sim-row">
-      <span class="sim-sector">${s.sector}</span>
-      <span class="sim-price">${s.price?s.price+" @ "+s.time:""}</span>
-      <span class="sim-badge ${s.status==="done"?"badge-done":s.status==="running"?"badge-run":"badge-wait"}">
-        ${s.status==="done"?"✓ done":s.status==="running"?"scanning…":"waiting"}
-      </span>
-    </div>`).join("");
+
+function solStartTimer(){solStopTimer();solTimer=setInterval(()=>{solTimeElapsed++;solUpdateStats();},1000);}
+function solStopTimer(){if(solTimer){clearInterval(solTimer);solTimer=null;}}
+
+function solUpdateStats(){
+  const fmt=s=>Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;
+  ['solScore','solScore2'].forEach(id=>g(id)&&(g(id).textContent=solScore));
+  ['solMoves','solMoves2'].forEach(id=>g(id)&&(g(id).textContent=solMoves));
+  [['solTime','Time: '],['solTime2','']].forEach(([id,pre])=>g(id)&&(g(id).textContent=pre+fmt(solTimeElapsed)));
 }
-function log(txt, cls=""){
-  const span = cls ? `<span class="${cls}">${txt}</span>` : txt;
-  logLines.push(span);
-  const lb = document.getElementById("log-box");
-  lb.innerHTML = logLines.join("<br>");
-  lb.scrollTop = lb.scrollHeight;
+function solUpdateMsg(msg){if(g('solMsg'))g('solMsg').textContent=msg;}
+
+function solCheckWin(){
+  if(solFoundations.reduce((a,f)=>a+f.length,0)===52){
+    solGameActive=false;solStopTimer();
+    const fmt=s=>Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60;
+    setTimeout(()=>showMsg('&#127942; You won Solitaire!<br><br>Score: '+solScore+'<br>Moves: '+solMoves+'<br>Time: '+fmt(solTimeElapsed),'&#127942;'),300);
+  }
 }
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-async function runScraper(){
-  if(simRunning) return;
-  simRunning = true;
-  logLines = [];
-  document.getElementById("run-btn").disabled = true;
-  initSim();
+function solColHeight(col){
+  const fd=col.filter(c=>!c.faceUp).length;
+  const fu=col.filter(c=>c.faceUp).length;
+  return fd*FD_OFFSET+fu*FU_OFFSET+96; // 96 = card height
+}
 
-  // Add pulsing effect to button during operation
-  const runBtn = document.getElementById("run-btn");
-  runBtn.classList.add('running');
+function solRender(){
+  // Deck
+  const deckEl=g('solDeck');
+  if(solDeck.length>0){deckEl.style.display='block';}
+  else{deckEl.style.display='flex';deckEl.innerHTML='<span style="font-size:22px;color:#888;margin:auto;">↺</span>';}
+  if(g('solDeckCount'))g('solDeckCount').textContent=solDeck.length>0?solDeck.length+' left':'';
 
-  const tomorrow = new Date(Date.now()+86400000).toISOString().slice(0,10);
-  log("═".repeat(52), "log-g");
-  log("  Daily Flight Scraper → Google Sheets", "log-w");
-  log("═".repeat(52), "log-g");
-  log(`  Date    : ${tomorrow} (tomorrow)`, "log-b");
-  log(`  Sectors : ${SECTORS.length} (domestic + international)`, "log-b");
-  log(`  Currency: PKR`, "log-b");
-  log("  Config  : CONFIG_10AM", "log-b");
-  log("═".repeat(52), "log-g");
-  log("");
+  // Waste
+  const wasteEl=g('solWaste');
+  if(solWaste.length>0){
+    const c=solWaste[solWaste.length-1];
+    wasteEl.style.visibility='visible';
+    wasteEl.className='sol-card '+(solIsRed(c.suit)?'red':'black')+(solSelected&&solSelected.from==='waste'?' selected':'');
+    wasteEl.innerHTML=
+      '<div class="sol-corner sol-corner-tl"><span class="sol-corner-rank">'+solRank(c.value)+'</span><span class="sol-corner-suit">'+solSuit(c.suit)+'</span></div>'+
+      '<div class="sol-center-suit">'+solSuit(c.suit)+'</div>'+
+      '<div class="sol-corner sol-corner-br"><span class="sol-corner-rank">'+solRank(c.value)+'</span><span class="sol-corner-suit">'+solSuit(c.suit)+'</span></div>';
+  } else {
+    wasteEl.style.visibility='hidden';
+    wasteEl.innerHTML='';
+    wasteEl.className='sol-card';
+  }
 
-  // Add overall progress tracking
-  log(`🚀 Starting scraping sequence for ${simState.length} sectors...`, "log-w");
-
-  for(let i=0;i<simState.length;i++){
-    simState[i].status="running";
-    renderSim();
-
-    // Enhanced logging with timing
-    const startTime = Date.now();
-    log(`✈  [${i+1}/${simState.length}] ${simState[i].sector}`, "log-b");
-
-    await sleep(200);
-    log(`   🔧 Initializing browser context...`, "log-g");
-    await sleep(150 + Math.random()*100);
-    log(`   🌐 Navigating to flight search portal...`, "log-g");
-
-    await sleep(280);
-    log(`   ⏳ Waiting for results (stall@120s = restart)...`, "log-g");
-    await sleep(350 + Math.random()*500);
-
-    const n = Math.floor(8+Math.random()*20);
-    log(`   📦 ${n} flights retrieved from API`, "log-g");
-    await sleep(180);
-    log(`   ✅ Data validation passed - ${n} flights captured.`, "log-y");
-
-    simState[i].status="done";
-    simState[i].price = PRICES_SIM[i];
-    simState[i].time = TIMES_SIM[i];
-    renderSim();
-
-    const processingTime = ((Date.now() - startTime) / 1000).toFixed(1);
-    log(`   → ${simState[i].sector}  ${PRICES_SIM[i]} @ ${TIMES_SIM[i]} (${processingTime}s)`, "log-y");
-
-    if(i < simState.length-1){
-      const delay = 20 + Math.floor(Math.random()*20);
-      log(`   💤 Cooling down before next sector (${delay}s)...`, "log-g");
-      await sleep(delay * 1000);
+  // Foundations
+  for(let fi=0;fi<4;fi++){
+    const el=g('solFound'+fi);
+    el.onclick=()=>solClickFoundation(fi);
+    const f=solFoundations[fi];
+    if(f.length){
+      const c=f[f.length-1];
+      el.className='sol-foundation has-card';
+      el.innerHTML='<div class="sol-card '+(solIsRed(c.suit)?'red':'black')+'" style="cursor:default;pointer-events:none;">'+
+        '<div class="sol-corner sol-corner-tl"><span class="sol-corner-rank">'+solRank(c.value)+'</span><span class="sol-corner-suit">'+solSuit(c.suit)+'</span></div>'+
+        '<div class="sol-center-suit">'+solSuit(c.suit)+'</div>'+
+        '<div class="sol-corner sol-corner-br"><span class="sol-corner-rank">'+solRank(c.value)+'</span><span class="sol-corner-suit">'+solSuit(c.suit)+'</span></div></div>';
+    } else {
+      el.className='sol-foundation';
+      el.innerHTML='<span style="font-size:28px;color:#bbb;">'+solSuit(FOUND_SUITS[fi])+'</span>';
     }
   }
 
-  log("");
-  log(`📊 Scraping complete. Preparing data for export...`, "log-w");
-  await sleep(500);
+  // Tableau
+  const tableEl=g('solTable');
+  tableEl.innerHTML='';
+  for(let ti=0;ti<7;ti++){
+    const col=solTableaus[ti];
+    const colDiv=document.createElement('div');
+    colDiv.className='sol-col';
+    // Set column min-height so stacks don't clip
+    const minH=col.length===0?96:solColHeight(col);
+    colDiv.style.minHeight=minH+'px';
+    colDiv.style.position='relative';
 
-  log(`📋 Pushing ${simState.length} flights to Sheets tab 'Jun-10'...`, "log-w");
-  await sleep(700);
-  log(`   ✅ ${simState.length * 2} cells updated (fare + time per flight).`);
-  log(`   ✅ Timestamp cells M24 + Q24 updated.`);
-  log(`   ✅ Data validation checksum passed.`, "log-y");
-  log("🏁 All done!", "log-w");
+    if(col.length===0){
+      // Empty column placeholder
+      const ph=document.createElement('div');
+      ph.className='sol-col-placeholder';
+      ph.style.position='absolute';ph.style.top='0';ph.style.left='0';
+      ph.onclick=()=>solClickEmptyCol(ti);
+      colDiv.appendChild(ph);
+    } else {
+      let topOffset=0;
+      col.forEach((card,cardIdx)=>{
+        const cardDiv=solMakeCard(card);
+        cardDiv.classList.add('sol-card-in-col');
+        cardDiv.style.position='absolute';
+        cardDiv.style.top=topOffset+'px';
+        cardDiv.style.left='0';
+        cardDiv.style.zIndex=cardIdx+1;
 
-  // Reset button state
-  runBtn.classList.remove('running');
-  document.getElementById("run-btn").disabled = false;
-  simRunning = false;
-
-  // Show completion toast
-  showToast("Scraping completed successfully!", "success");
-}
-
-// Toast notification system
-function showToast(message, type = "info") {
-  // Remove any existing toasts
-  const existingToast = document.querySelector('.toast');
-  if (existingToast) {
-    existingToast.remove();
-  }
-
-  const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `
-    <div class="toast-content">
-      <span class="toast-message">${message}</span>
-    </div>
-  `;
-
-  // Add styles if not already present
-  if (!document.querySelector('style#toast-styles')) {
-    const style = document.createElement('style');
-    style.id = 'toast-styles';
-    style.textContent = `
-      .toast {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background: var(--bg2);
-        border: 1px solid var(--border2);
-        border-radius: var(--radius-lg);
-        padding: 1rem 1.5rem;
-        box-shadow: var(--shadow-lg);
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
-        font-size: 0.875rem;
-        min-width: 250px;
-      }
-
-      .toast-success {
-        border-left: 4px solid var(--green);
-        background: var(--green-bg);
-      }
-
-      .toast-info {
-        border-left: 4px solid var(--accent2);
-        background: rgba(59,130,246,0.08);
-      }
-
-      .toast-warning {
-        border-left: 4px solid var(--amber);
-        background: var(--amber-bg);
-      }
-
-      .toast-error {
-        border-left: 4px solid var(--red);
-        background: var(--red-bg);
-      }
-
-      .toast-content {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .toast-message {
-        flex: 1;
-      }
-
-      @keyframes slideIn {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
+        // Highlight selected stack
+        if(solSelected&&solSelected.from==='tableau'&&solSelected.colIdx===ti&&cardIdx>=solSelected.cardIdx){
+          cardDiv.classList.add('selected');
         }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
 
-      @keyframes fadeOut {
-        to {
-          opacity: 0;
-          pointer-events: none;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
+        cardDiv.onclick=e=>solClickTableau(ti,cardIdx,e);
+        colDiv.appendChild(cardDiv);
 
-  document.body.appendChild(toast);
-
-  // Auto remove after 3 seconds
-  setTimeout(() => {
-    toast.remove();
-  }, 3000);
-}
-
-/* ── Tabs ── */
-function showTab(id, btn){
-  // Hide all panels
-  document.querySelectorAll(".panel").forEach(p=>{
-    p.classList.remove("active");
-    p.style.opacity = "0";
-    p.style.transform = "translateY(20px)";
-  });
-
-  // Remove active class from all tabs
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-
-  // Show selected panel with animation
-  const panel = document.getElementById("panel-"+id);
-  panel.classList.add("active");
-
-  // Trigger reflow to enable transition
-  void panel.offsetWidth;
-
-  panel.style.opacity = "1";
-  panel.style.transform = "translateY(0)";
-
-  // Activate selected tab
-  btn.classList.add("active");
-}
-
-/* ── Init ── */
-genMatrix();
-renderFareTable();
-renderMatrix();
-updateKPI();
-initSim();
-
-// Enhanced UI/UX features
-document.addEventListener('DOMContentLoaded', function() {
-  // Add smooth scroll behavior for internal links
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-      e.preventDefault();
-      document.querySelector(this.getAttribute('href')).scrollIntoView({
-        behavior: 'smooth'
+        // Advance offset
+        if(!card.faceUp) topOffset+=FD_OFFSET;
+        else topOffset+=FU_OFFSET;
       });
-    });
-  });
-
-  // Add keyboard navigation for tabs
-  document.addEventListener('keydown', function(e) {
-    if (e.target.matches && e.target.matches('.tab')) {
-      if (e.key === 'ArrowRight') {
-        const tabs = Array.from(document.querySelectorAll('.tab'));
-        const currentIndex = tabs.indexOf(e.target);
-        const nextIndex = (currentIndex + 1) % tabs.length;
-        tabs[nextIndex].click();
-      } else if (e.key === 'ArrowLeft') {
-        const tabs = Array.from(document.querySelectorAll('.tab'));
-        const currentIndex = tabs.indexOf(e.target);
-        const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-        tabs[prevIndex].click();
-      }
     }
-  });
-
-  // Add tooltips for data points in fare table
-  const fareTable = document.getElementById('fare-tbody');
-  if (fareTable) {
-    fareTable.addEventListener('mouseover', function(e) {
-      if (e.target.tagName === 'TD' && e.target.parentElement.rowIndex > 0) {
-        const row = e.target.parentElement;
-        const route = row.cells[0].textContent;
-        const airline = row.cells[1].textContent;
-        const fare = row.cells[3].textContent;
-        const stops = row.cells[4].textContent;
-
-        const tooltip = document.createElement('div');
-        tooltip.className = 'fare-tooltip';
-        tooltip.innerHTML = `
-          <div><strong>Route:</strong> ${route}</div>
-          <div><strong>Airline:</strong> ${airline}</div>
-          <div><strong>Fare:</strong> ${fare}</div>
-          <div><strong>Stops:</strong> ${stops}</div>
-        `;
-        tooltip.style.position = 'absolute';
-        tooltip.style.background = 'var(--bg2)';
-        tooltip.style.border = '1px solid var(--border2)';
-        tooltip.style.borderRadius = 'var(--radius-md)';
-        tooltip.style.padding = '0.75rem';
-        tooltip.style.boxShadow = 'var(--shadow-md)';
-        tooltip.style.zIndex = '1000';
-        tooltip.style.fontSize = '0.875rem';
-        tooltip.style.maxWidth = '200px';
-
-        document.body.appendChild(tooltip);
-
-        const rect = e.target.getBoundingClientRect();
-        tooltip.style.top = (rect.bottom + window.scrollY + 8) + 'px';
-        tooltip.style.left = (rect.left + window.scrollX) + 'px';
-      }
-    });
-
-    fareTable.addEventListener('mouseout', function(e) {
-      const tooltip = document.querySelector('.fare-tooltip');
-      if (tooltip) {
-        tooltip.remove();
-      }
-    });
+    tableEl.appendChild(colDiv);
   }
+}
 
-  // Add export functionality
-  const exportButton = document.createElement('button');
-  exportButton.innerHTML = '📥 Export Data';
-  exportButton.className = 'export-btn';
-  exportButton.style.marginTop = '1.5rem';
-  exportButton.style.padding = '0.5rem 1rem';
-  exportButton.style.background = 'var(--accent)';
-  exportButton.style.color = '#fff';
-  exportButton.style.border = 'none';
-  exportButton.style.borderRadius = 'var(--radius-md)';
-  exportButton.style.cursor = 'pointer';
-  exportButton.style.transition = 'var(--transition-normal)';
-
-  exportButton.addEventListener('click', function() {
-    // Create CSV from fare data
-    const csvContent = [
-      ['Route', 'Airline', 'Departure Time', 'Fare (PKR)', 'Stops', 'Tag'],
-      ...FARES.map(f => [
-        f.route,
-        AIRLINES[f.airline],
-        f.dep,
-        f.pkr.toLocaleString(),
-        f.stops === 0 ? 'Non-stop' : '1 stop',
-        f.tag === 'best' ? 'Best fare' : f.tag === 'direct' ? 'Direct' : ''
-      ])
-    ]
-    .map(row => row.map(value => `"${value}"`).join(','))
-    .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'fare-data.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  });
-
-  // Add export button to dashboard
-  const dashboardPanel = document.getElementById('panel-dashboard');
-  if (dashboardPanel) {
-    dashboardPanel.appendChild(exportButton);
-  }
-});
 </script>
 </body>
 </html>
